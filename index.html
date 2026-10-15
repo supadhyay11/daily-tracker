@@ -9,6 +9,10 @@
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
 <title>Daily Tracker</title>
+<script>
+  // apply saved theme before first paint (no flash)
+  try { var t = localStorage.getItem('trackerTheme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
 <style>
   :root {
     color-scheme: light dark;
@@ -17,14 +21,26 @@
     --red: #dc2626; --red-soft: #fee2e2; --yellow: #d97706; --yellow-soft: #fef3c7; --green: #16a34a; --green-soft: #dcfce7;
     --input: #ffffff; --shadow: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
   }
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0f1115; --card: #181b21; --text: #e8eaee; --muted: #9aa3b2; --line: #272b34;
+    --accent: #818cf8; --accent-soft: #23264f; --on-accent: #0f1115;
+    --red: #f87171; --red-soft: #3b1a1a; --yellow: #fbbf24; --yellow-soft: #3a2d0f; --green: #4ade80; --green-soft: #12301d;
+    --input: #12151a; --shadow: none;
+  }
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]):not([data-theme="dark"]) {
       --bg: #0f1115; --card: #181b21; --text: #e8eaee; --muted: #9aa3b2; --line: #272b34;
       --accent: #818cf8; --accent-soft: #23264f; --on-accent: #0f1115;
       --red: #f87171; --red-soft: #3b1a1a; --yellow: #fbbf24; --yellow-soft: #3a2d0f; --green: #4ade80; --green-soft: #12301d;
       --input: #12151a; --shadow: none;
     }
   }
+  .theme-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--card); }
+  .theme-seg button { background: none; border: none; padding: 0 11px; min-height: 34px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+  .theme-seg button + button { border-left: 1px solid var(--line); }
+  .theme-seg button.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { -webkit-text-size-adjust: 100%; }
   body {
@@ -184,7 +200,12 @@
       <div class="greet" id="greeting">Hello</div>
       <div class="subdate" id="todayLabel"></div>
     </div>
-    <div class="authbar" id="authBar"><span class="sync-status">Saved on this device only</span></div>
+    <div class="authbar">
+      <div class="theme-seg" role="group" aria-label="Theme">
+        <button data-theme-opt="auto">Auto</button><button data-theme-opt="light">Light</button><button data-theme-opt="dark">Dark</button>
+      </div>
+      <span id="authBar" class="authbar" style="gap:8px"><span class="sync-status">Saved on this device only</span></span>
+    </div>
   </header>
 
   <main class="grid">
@@ -798,6 +819,21 @@ $('importFile').addEventListener('change', e => {
   };
   r.readAsText(f);
 });
+
+// theme: auto (follow device) / light / dark
+function currentThemePref() { try { const t = localStorage.getItem('trackerTheme'); return t === 'light' || t === 'dark' ? t : 'auto'; } catch (e) { return 'auto'; } }
+function applyTheme(pref) {
+  const root = document.documentElement;
+  if (pref === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', pref);
+  try { if (pref === 'auto') localStorage.removeItem('trackerTheme'); else localStorage.setItem('trackerTheme', pref); } catch (e) {}
+  document.querySelectorAll('[data-theme-opt]').forEach(b => b.classList.toggle('on', b.dataset.themeOpt === pref));
+  const dark = pref === 'dark' || (pref === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
+  const m = document.createElement('meta'); m.name = 'theme-color'; m.content = dark ? '#0f1115' : '#f3f4f6'; document.head.appendChild(m);
+}
+document.querySelectorAll('[data-theme-opt]').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.themeOpt)));
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (currentThemePref() === 'auto') applyTheme('auto'); });
+applyTheme(currentThemePref());
 
 // refresh when the tab becomes visible again (new day, etc.)
 document.addEventListener('visibilitychange', () => { if (!document.hidden) renderAll(); });
