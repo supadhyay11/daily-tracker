@@ -23,6 +23,17 @@
   h1 { font-size: 22px; margin: 0 0 2px; color: #1f1e1a; }
   .subdate { color: #7a7568; font-size: 13px; }
 
+  .authbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; font-size: 13px; color: #7a7568; }
+  .authbar button, .foot button, .foot label {
+    background: #fff; border: 1px solid #e2ded2; border-radius: 8px; padding: 0 12px; min-height: 36px;
+    font-size: 13px; color: #4a463c; cursor: pointer; display: inline-flex; align-items: center; font-family: inherit;
+  }
+  .authbar button.primary { background: #b5652d; border-color: #b5652d; color: #fff; font-weight: 600; }
+  .sync-status { font-size: 12.5px; }
+  .sync-status.ok { color: #3f8f5f; }
+  .sync-status.err { color: #c0554a; }
+  .foot { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+
   .dashboard-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -34,94 +45,45 @@
   }
   .span-full { grid-column: 1 / -1; }
 
-  .card {
-    background: #ffffff;
-    border: 1px solid #e9e6dc;
-    border-radius: 10px;
-    padding: 16px;
-    min-width: 0;
-  }
+  .card { background: #ffffff; border: 1px solid #e9e6dc; border-radius: 10px; padding: 16px; min-width: 0; }
 
   .section-title {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #9c9686;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: #9c9686;
+    margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
   }
 
-  .item-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 0;
-    min-height: 46px;
-    border-bottom: 1px solid #f1efe8;
-  }
+  .item-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; min-height: 46px; border-bottom: 1px solid #f1efe8; }
   .item-row:last-child { border-bottom: none; }
-  .item-row input[type="checkbox"] {
-    width: 22px; height: 22px; accent-color: #b5652d; cursor: pointer; flex-shrink: 0;
-  }
+  .item-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: #b5652d; cursor: pointer; flex-shrink: 0; }
   .item-row .label { flex: 1; font-size: 15.5px; word-break: break-word; }
   .item-row .label.done { text-decoration: line-through; color: #ada89a; }
-  .del-btn {
-    background: none; border: none; color: #c7c2b3; cursor: pointer; font-size: 17px;
-    min-width: 40px; min-height: 40px; padding: 2px 6px;
-  }
+  .del-btn { background: none; border: none; color: #c7c2b3; cursor: pointer; font-size: 17px; min-width: 40px; min-height: 40px; padding: 2px 6px; }
   .del-btn:active { color: #c0554a; }
 
   .add-row { display: flex; gap: 8px; margin-top: 10px; }
-  .add-row input, .add-row select {
-    flex: 1;
-    min-width: 0;
-    padding: 11px 10px;
-    border: 1px solid #e2ded2;
-    border-radius: 7px;
-    font-size: 16px;
-    font-family: inherit;
-    background: #fffefb;
+  .add-row input {
+    flex: 1; min-width: 0; padding: 11px 10px; border: 1px solid #e2ded2; border-radius: 7px;
+    font-size: 16px; font-family: inherit; background: #fffefb;
   }
   .add-row button, .wk-add-row button {
-    background: #b5652d;
-    color: #fff;
-    border: none;
-    border-radius: 7px;
-    padding: 0 16px;
-    min-height: 44px;
-    font-size: 15px;
-    cursor: pointer;
+    background: #b5652d; color: #fff; border: none; border-radius: 7px; padding: 0 16px; min-height: 44px; font-size: 15px; cursor: pointer;
   }
 
   .empty { color: #b3ae9f; font-size: 14px; padding: 6px 0; }
-
-  .streak {
-    font-size: 12px;
-    color: #8a8574;
-    background: #f2f0e8;
-    padding: 3px 8px;
-    border-radius: 20px;
-  }
+  .streak { font-size: 12px; color: #8a8574; background: #f2f0e8; padding: 3px 8px; border-radius: 20px; }
 
   .goal-row .label { font-weight: 500; }
   .pin-btn { background: none; border: none; cursor: pointer; font-size: 16px; min-width: 32px; min-height: 40px; padding: 2px 4px; }
   .pin-btn:not(.pinned) { opacity: 0.3; }
 
-  .progress-bar-bg {
-    height: 6px; background: #eeece3; border-radius: 4px; overflow: hidden; margin-top: 10px;
-  }
-  .progress-bar-fill {
-    height: 100%; background: #b5652d; border-radius: 4px; transition: width 0.3s;
-  }
+  .progress-bar-bg { height: 6px; background: #eeece3; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+  .progress-bar-fill { height: 100%; background: #b5652d; border-radius: 4px; transition: width 0.3s; }
 
   .wk-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
   .wk-nav .wk-range { font-size: 13.5px; font-weight: 500; color: #4a463c; }
   .wk-nav-btns { display: flex; gap: 6px; }
   .wk-nav-btns button {
-    background: #f2f0e8; border: 1px solid #e9e6dc; border-radius: 7px;
-    padding: 0 11px; min-height: 38px; font-size: 13px; cursor: pointer; color: #6f6a5c;
+    background: #f2f0e8; border: 1px solid #e9e6dc; border-radius: 7px; padding: 0 11px; min-height: 38px; font-size: 13px; cursor: pointer; color: #6f6a5c;
   }
 
   .wk-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -131,10 +93,7 @@
   .wk-table th.wk-today, .wk-table td.wk-today { background: #fbf3ea; }
   .wk-task-cell { text-align: left !important; font-size: 13.5px; min-width: 110px; display: flex; align-items: center; gap: 6px; }
   .wk-table input[type="checkbox"] { width: 20px; height: 20px; accent-color: #b5652d; cursor: pointer; }
-  .wk-goal-input {
-    width: 44px; padding: 6px 4px; border: 1px solid #e2ded2; border-radius: 5px;
-    font-size: 16px; text-align: center; font-family: inherit;
-  }
+  .wk-goal-input { width: 44px; padding: 6px 4px; border: 1px solid #e2ded2; border-radius: 5px; font-size: 16px; text-align: center; font-family: inherit; }
   .wk-progress-cell { display: flex; align-items: center; gap: 6px; min-width: 90px; }
   .wk-mini-bar-bg { flex: 1; height: 5px; background: #eeece3; border-radius: 3px; overflow: hidden; }
   .wk-mini-bar-fill { height: 100%; background: #b5652d; }
@@ -145,9 +104,7 @@
   .wk-score-badge.low { color: #c0554a; }
   .wk-score-badge.mid { color: #a97a1f; }
   .wk-score-badge.high { color: #3f8f5f; }
-  .wk-overall {
-    font-size: 12.5px; padding: 4px 10px; border-radius: 20px; font-weight: 600;
-  }
+  .wk-overall { font-size: 12.5px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
   .wk-overall.low { background: #f7e6e2; color: #c0554a; }
   .wk-overall.mid { background: #faf1de; color: #a97a1f; }
   .wk-overall.high { background: #e6f2ea; color: #3f8f5f; }
@@ -171,6 +128,7 @@
   <header>
     <h1>Daily Tracker</h1>
     <div class="subdate" id="todayLabel"></div>
+    <div class="authbar" id="authBar"><span class="sync-status">Saved on this device only</span></div>
   </header>
 
   <div class="dashboard-grid">
@@ -239,10 +197,18 @@
     </div>
 
   </div>
+
+  <div class="foot">
+    <button id="exportBtn">Export data</button>
+    <label>Import data<input type="file" id="importFile" accept="application/json,.json" hidden></label>
+  </div>
 </div>
 
 <script>
 // ---------- utilities ----------
+let applyingRemote = false;
+window.cloudSignedIn = false;
+
 function todayKey() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -253,16 +219,24 @@ function load(key, fallback) {
     return v ? JSON.parse(v) : fallback;
   } catch(e) { return fallback; }
 }
-function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+  if (applyingRemote) return;
+  if (!window.cloudSignedIn) { try { localStorage.setItem('trackerDirty', '1'); } catch(e) {} }
+  if (window.cloudPush) window.cloudPush();
+}
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
 document.getElementById('todayLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
 // ---------- ROUTINE ----------
 let routineItems = load('routineItems', [
-  { id: uid(), text: 'Morning workout' },
-  { id: uid(), text: 'Drink water' },
-  { id: uid(), text: 'Review priorities' }
+  { id: 'r-workout', text: 'Morning workout' },
+  { id: 'r-water', text: 'Drink water' },
+  { id: 'r-priorities', text: 'Review priorities' }
 ]);
 let routineChecks = load('routineChecks', {});
 
@@ -364,10 +338,6 @@ function addGoal() {
 }
 document.getElementById('goalInput').addEventListener('keydown', e => { if (e.key === 'Enter') addGoal(); });
 
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
 // ---------- TODO ----------
 let todoItems = load('todoItems', []);
 function renderTodo() {
@@ -443,7 +413,6 @@ function getWeekDates(offset) {
   }
   return out;
 }
-
 function pctTier(pct) {
   if (pct >= 100) return 'high';
   if (pct >= 50) return 'mid';
@@ -517,9 +486,8 @@ function renderWeekly() {
   table.innerHTML = thead + tbody;
 
   const overallPct = totalGoal > 0 ? Math.round((totalScore / totalGoal) * 100) : 0;
-  const overallTier = pctTier(overallPct);
   overallEl.textContent = overallPct + '% complete';
-  overallEl.className = 'wk-overall ' + overallTier;
+  overallEl.className = 'wk-overall ' + pctTier(overallPct);
 
   table.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     cb.addEventListener('change', () => {
@@ -567,11 +535,185 @@ document.getElementById('wkPrev').addEventListener('click', () => { wkOffset--; 
 document.getElementById('wkNext').addEventListener('click', () => { wkOffset++; renderWeekly(); });
 document.getElementById('wkToday').addEventListener('click', () => { wkOffset = 0; renderWeekly(); });
 
-// ---------- init ----------
-renderRoutine();
-renderGoals();
-renderTodo();
-renderWeekly();
+// ---------- state / sync bridge ----------
+const STATE_KEYS = ['routineItems','routineChecks','goalItems','todoItems','weeklyTasks','weeklyChecks'];
+function getState() {
+  return { routineItems, routineChecks, goalItems, todoItems, weeklyTasks, weeklyChecks };
+}
+function renderAll() { renderRoutine(); renderGoals(); renderTodo(); renderWeekly(); }
+function applyState(s) {
+  applyingRemote = true;
+  routineItems = Array.isArray(s.routineItems) ? s.routineItems : [];
+  routineChecks = s.routineChecks || {};
+  goalItems = Array.isArray(s.goalItems) ? s.goalItems : [];
+  todoItems = Array.isArray(s.todoItems) ? s.todoItems : [];
+  weeklyTasks = Array.isArray(s.weeklyTasks) ? s.weeklyTasks : [];
+  weeklyChecks = s.weeklyChecks || {};
+  STATE_KEYS.forEach(k => { try { localStorage.setItem(k, JSON.stringify(getState()[k])); } catch(e) {} });
+  applyingRemote = false;
+  renderAll();
+}
+function deepOr(a, b) {
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    const o = {};
+    new Set([...Object.keys(a), ...Object.keys(b)]).forEach(k => { o[k] = deepOr(a[k], b[k]); });
+    return o;
+  }
+  if (a === undefined) return b;
+  if (b === undefined) return a;
+  return a || b;
+}
+function mergeArr(a, b) {
+  const m = new Map();
+  [...(b || []), ...(a || [])].forEach(x => { if (x && !m.has(x.id)) m.set(x.id, x); });
+  return [...m.values()];
+}
+function mergeState(a, b) {
+  return {
+    routineItems: mergeArr(a.routineItems, b.routineItems),
+    routineChecks: deepOr(a.routineChecks || {}, b.routineChecks || {}),
+    goalItems: mergeArr(a.goalItems, b.goalItems),
+    todoItems: mergeArr(a.todoItems, b.todoItems),
+    weeklyTasks: mergeArr(a.weeklyTasks, b.weeklyTasks),
+    weeklyChecks: deepOr(a.weeklyChecks || {}, b.weeklyChecks || {})
+  };
+}
+window.TrackerApp = {
+  getState, applyState, mergeState,
+  isDirty: () => localStorage.getItem('trackerDirty') === '1',
+  clearDirty: () => localStorage.removeItem('trackerDirty')
+};
+
+// export / import
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(getState(), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'daily-tracker-' + todayKey() + '.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+document.getElementById('importFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (!data || typeof data !== 'object') throw new Error('bad');
+      applyState(mergeState(getState(), data));
+      STATE_KEYS.forEach(k => save(k, getState()[k]));
+      alert('Imported.');
+    } catch (err) { alert('That file is not a valid Daily Tracker export.'); }
+    e.target.value = '';
+  };
+  r.readAsText(f);
+});
+
+renderAll();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCC4R4y19E_oqc7KFGiuSLjl72UAmawswI",
+  authDomain: "daily-tracker-9ddd5.firebaseapp.com",
+  projectId: "daily-tracker-9ddd5",
+  storageBucket: "daily-tracker-9ddd5.firebasestorage.app",
+  messagingSenderId: "521984800225",
+  appId: "1:521984800225:web:84179dfe76e203c1cc0ea0"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const T = window.TrackerApp;
+
+const bar = document.getElementById('authBar');
+let ref = null, unsub = null, pushTimer = null, lastJson = '', email = '';
+
+function renderBar(kind, msg) {
+  if (!email) {
+    bar.innerHTML = `<button class="primary" id="signInBtn">Sign in with Google to sync</button><span class="sync-status ${kind || ''}">${msg || 'Saved on this device only'}</span>`;
+    document.getElementById('signInBtn').addEventListener('click', signIn);
+  } else {
+    bar.innerHTML = `<span class="sync-status ${kind || ''}">${msg || ''}</span><span>${email}</span><button id="signOutBtn">Sign out</button>`;
+    document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
+  }
+}
+async function signIn() {
+  const p = new GoogleAuthProvider();
+  try { await signInWithPopup(auth, p); }
+  catch (e) {
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+      try { await signInWithRedirect(auth, p); } catch (e2) { renderBar('err', 'Sign-in failed (' + e2.code + ')'); }
+    } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      renderBar('err', 'Sign-in failed (' + e.code + ')');
+    }
+  }
+}
+async function push() {
+  if (!ref) return;
+  const json = JSON.stringify(T.getState());
+  lastJson = json;
+  try {
+    await setDoc(ref, { json, updatedAt: serverTimestamp() });
+    renderBar('ok', '✓ Synced');
+  } catch (e) { console.error(e); renderBar('err', 'Sync error — will retry on next change'); }
+}
+window.cloudPush = () => {
+  if (!ref) return;
+  clearTimeout(pushTimer);
+  renderBar('', 'Saving…');
+  pushTimer = setTimeout(push, 400);
+};
+
+onAuthStateChanged(auth, async (user) => {
+  if (unsub) { unsub(); unsub = null; }
+  ref = null;
+  window.cloudSignedIn = false;
+  if (!user) { email = ''; renderBar('', 'Saved on this device only'); return; }
+  email = user.email || 'Signed in';
+  renderBar('', 'Syncing…');
+  const r = doc(db, 'users', user.uid, 'data', 'main');
+  try {
+    const snap = await getDoc(r);
+    if (snap.exists()) {
+      const remote = JSON.parse(snap.data().json);
+      if (T.isDirty()) {
+        T.applyState(T.mergeState(T.getState(), remote));
+        ref = r;
+        await push();
+      } else {
+        T.applyState(remote);
+        lastJson = snap.data().json;
+        ref = r;
+      }
+    } else {
+      ref = r;
+      await push();
+    }
+    T.clearDirty();
+    window.cloudSignedIn = true;
+    renderBar('ok', '✓ Synced');
+    unsub = onSnapshot(r, (s) => {
+      if (s.metadata.hasPendingWrites || !s.exists()) return;
+      const json = s.data().json;
+      if (json === lastJson) return;
+      lastJson = json;
+      T.applyState(JSON.parse(json));
+      renderBar('ok', '✓ Synced');
+    });
+  } catch (e) {
+    console.error(e);
+    ref = null;
+    renderBar('err', 'Sync unavailable (' + (e.code || 'error') + ') — using this device only');
+  }
+});
+renderBar('', 'Saved on this device only');
 </script>
 </body>
 </html>
