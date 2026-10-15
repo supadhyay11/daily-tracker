@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tracker">
+<meta name="theme-color" content="#f7f6f3">
+<title>Daily Tracker</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f7f6f3;
+    color: #2b2b26;
+    padding: calc(14px + env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom));
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  header { margin-bottom: 14px; }
+  h1 { font-size: 22px; margin: 0 0 2px; color: #1f1e1a; }
+  .subdate { color: #7a7568; font-size: 13px; }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  @media (min-width: 700px) {
+    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  }
+  .span-full { grid-column: 1 / -1; }
+
+  .card {
+    background: #ffffff;
+    border: 1px solid #e9e6dc;
+    border-radius: 10px;
+    padding: 16px;
+    min-width: 0;
+  }
+
+  .section-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9c9686;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    min-height: 46px;
+    border-bottom: 1px solid #f1efe8;
+  }
+  .item-row:last-child { border-bottom: none; }
+  .item-row input[type="checkbox"] {
+    width: 22px; height: 22px; accent-color: #b5652d; cursor: pointer; flex-shrink: 0;
+  }
+  .item-row .label { flex: 1; font-size: 15.5px; word-break: break-word; }
+  .item-row .label.done { text-decoration: line-through; color: #ada89a; }
+  .del-btn {
+    background: none; border: none; color: #c7c2b3; cursor: pointer; font-size: 17px;
+    min-width: 40px; min-height: 40px; padding: 2px 6px;
+  }
+  .del-btn:active { color: #c0554a; }
+
+  .add-row { display: flex; gap: 8px; margin-top: 10px; }
+  .add-row input, .add-row select {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 10px;
+    border: 1px solid #e2ded2;
+    border-radius: 7px;
+    font-size: 16px;
+    font-family: inherit;
+    background: #fffefb;
+  }
+  .add-row button, .wk-add-row button {
+    background: #b5652d;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 0 16px;
+    min-height: 44px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .empty { color: #b3ae9f; font-size: 14px; padding: 6px 0; }
+
+  .streak {
+    font-size: 12px;
+    color: #8a8574;
+    background: #f2f0e8;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .goal-row .label { font-weight: 500; }
+  .pin-btn { background: none; border: none; cursor: pointer; font-size: 16px; min-width: 32px; min-height: 40px; padding: 2px 4px; }
+  .pin-btn:not(.pinned) { opacity: 0.3; }
+
+  .progress-bar-bg {
+    height: 6px; background: #eeece3; border-radius: 4px; overflow: hidden; margin-top: 10px;
+  }
+  .progress-bar-fill {
+    height: 100%; background: #b5652d; border-radius: 4px; transition: width 0.3s;
+  }
+
+  .wk-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  .wk-nav .wk-range { font-size: 13.5px; font-weight: 500; color: #4a463c; }
+  .wk-nav-btns { display: flex; gap: 6px; }
+  .wk-nav-btns button {
+    background: #f2f0e8; border: 1px solid #e9e6dc; border-radius: 7px;
+    padding: 0 11px; min-height: 38px; font-size: 13px; cursor: pointer; color: #6f6a5c;
+  }
+
+  .wk-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .wk-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 620px; }
+  .wk-table th, .wk-table td { padding: 7px 5px; text-align: center; border-bottom: 1px solid #f1efe8; }
+  .wk-table th { color: #9c9686; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .wk-table th.wk-today, .wk-table td.wk-today { background: #fbf3ea; }
+  .wk-task-cell { text-align: left !important; font-size: 13.5px; min-width: 110px; display: flex; align-items: center; gap: 6px; }
+  .wk-table input[type="checkbox"] { width: 20px; height: 20px; accent-color: #b5652d; cursor: pointer; }
+  .wk-goal-input {
+    width: 44px; padding: 6px 4px; border: 1px solid #e2ded2; border-radius: 5px;
+    font-size: 16px; text-align: center; font-family: inherit;
+  }
+  .wk-progress-cell { display: flex; align-items: center; gap: 6px; min-width: 90px; }
+  .wk-mini-bar-bg { flex: 1; height: 5px; background: #eeece3; border-radius: 3px; overflow: hidden; }
+  .wk-mini-bar-fill { height: 100%; background: #b5652d; }
+  .wk-mini-bar-fill.low { background: #c0554a; }
+  .wk-mini-bar-fill.mid { background: #d9a441; }
+  .wk-mini-bar-fill.high { background: #3f8f5f; }
+  .wk-score-badge { font-weight: 600; font-size: 12.5px; color: #6f6a5c; }
+  .wk-score-badge.low { color: #c0554a; }
+  .wk-score-badge.mid { color: #a97a1f; }
+  .wk-score-badge.high { color: #3f8f5f; }
+  .wk-overall {
+    font-size: 12.5px; padding: 4px 10px; border-radius: 20px; font-weight: 600;
+  }
+  .wk-overall.low { background: #f7e6e2; color: #c0554a; }
+  .wk-overall.mid { background: #faf1de; color: #a97a1f; }
+  .wk-overall.high { background: #e6f2ea; color: #3f8f5f; }
+  .wk-del { background: none; border: none; color: #c7c2b3; cursor: pointer; font-size: 15px; min-width: 36px; min-height: 36px; }
+  .wk-add-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; flex-wrap: wrap; }
+  .wk-add-row input[type="text"] {
+    flex: 1; min-width: 180px; padding: 11px 10px; border: 1px solid #e2ded2; border-radius: 7px;
+    font-size: 16px; font-family: inherit; background: #fffefb;
+  }
+  .wk-add-row label { font-size: 12.5px; color: #9c9686; white-space: nowrap; }
+  .wk-add-row input[type="number"] {
+    width: 56px; padding: 11px 6px; border: 1px solid #e2ded2; border-radius: 7px;
+    font-size: 16px; font-family: inherit; background: #fffefb; text-align: center;
+  }
+  .scroll-hint { font-size: 11.5px; color: #b3ae9f; margin: 6px 0 0; }
+  @media (min-width: 700px) { .scroll-hint { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Daily Tracker</h1>
+    <div class="subdate" id="todayLabel"></div>
+  </header>
+
+  <div class="dashboard-grid">
+
+    <!-- ROUTINE -->
+    <div class="card">
+      <div class="section-title">
+        <span>Today's Routine</span>
+        <span class="streak" id="routineProgress">0/0</span>
+      </div>
+      <div id="routineList"></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="routineBar" style="width:0%"></div></div>
+      <div class="add-row">
+        <input type="text" id="routineInput" placeholder="Add a routine item" enterkeyhint="done">
+        <button onclick="addRoutine()">Add</button>
+      </div>
+    </div>
+
+    <!-- GOALS -->
+    <div class="card">
+      <div class="section-title"><span>Goals</span></div>
+      <div id="goalList"></div>
+      <div class="add-row">
+        <input type="text" id="goalInput" placeholder="Add a goal" enterkeyhint="done">
+        <button onclick="addGoal()">Add</button>
+      </div>
+    </div>
+
+    <!-- TODO -->
+    <div class="card">
+      <div class="section-title">
+        <span>To-Do List</span>
+        <span class="streak" id="todoProgress">0/0</span>
+      </div>
+      <div id="todoList"></div>
+      <div class="add-row">
+        <input type="text" id="todoInput" placeholder="Add a task" enterkeyhint="done">
+        <button onclick="addTodo()">Add</button>
+      </div>
+    </div>
+
+    <!-- WEEKLY GOALS -->
+    <div class="card span-full">
+      <div class="wk-nav">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span class="section-title" style="margin-bottom:0;">Weekly Goals</span>
+          <span class="wk-range" id="wkRange"></span>
+          <span class="wk-overall" id="wkOverall">0%</span>
+        </div>
+        <div class="wk-nav-btns">
+          <button id="wkPrev">◀ Prev</button>
+          <button id="wkToday">This Week</button>
+          <button id="wkNext">Next ▶</button>
+        </div>
+      </div>
+      <div class="wk-table-wrap">
+        <table class="wk-table" id="wkTable"></table>
+      </div>
+      <p class="scroll-hint">Swipe the table sideways to see all days →</p>
+      <div class="wk-add-row">
+        <input type="text" id="wkTaskInput" placeholder="Add a task to track (e.g. Read 20 min)" enterkeyhint="done">
+        <label for="wkGoalInput">Goal / week</label>
+        <input type="number" id="wkGoalInput" min="1" max="7" value="5" inputmode="numeric">
+        <button onclick="addWeeklyTask()">Add</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ---------- utilities ----------
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function load(key, fallback) {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  } catch(e) { return fallback; }
+}
+function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+document.getElementById('todayLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+// ---------- ROUTINE ----------
+let routineItems = load('routineItems', [
+  { id: uid(), text: 'Morning workout' },
+  { id: uid(), text: 'Drink water' },
+  { id: uid(), text: 'Review priorities' }
+]);
+let routineChecks = load('routineChecks', {});
+
+function renderRoutine() {
+  const list = document.getElementById('routineList');
+  const key = todayKey();
+  const checksToday = routineChecks[key] || {};
+  list.innerHTML = '';
+  if (routineItems.length === 0) {
+    list.innerHTML = '<div class="empty">No routine items yet. Add one below.</div>';
+  }
+  routineItems.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    const checked = !!checksToday[item.id];
+    row.innerHTML = `
+      <input type="checkbox" ${checked ? 'checked' : ''} data-id="${item.id}">
+      <span class="label ${checked ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      <button class="del-btn" data-del="${item.id}">✕</button>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const id = cb.dataset.id;
+      const key = todayKey();
+      if (!routineChecks[key]) routineChecks[key] = {};
+      routineChecks[key][id] = cb.checked;
+      save('routineChecks', routineChecks);
+      renderRoutine();
+    });
+  });
+  list.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', () => {
+      routineItems = routineItems.filter(i => i.id !== b.dataset.del);
+      save('routineItems', routineItems);
+      renderRoutine();
+    });
+  });
+  const total = routineItems.length;
+  const done = routineItems.filter(i => checksToday[i.id]).length;
+  document.getElementById('routineProgress').textContent = `${done}/${total}`;
+  document.getElementById('routineBar').style.width = total ? (done/total*100) + '%' : '0%';
+}
+function addRoutine() {
+  const input = document.getElementById('routineInput');
+  const text = input.value.trim();
+  if (!text) return;
+  routineItems.push({ id: uid(), text });
+  save('routineItems', routineItems);
+  input.value = '';
+  renderRoutine();
+}
+document.getElementById('routineInput').addEventListener('keydown', e => { if (e.key === 'Enter') addRoutine(); });
+
+// ---------- GOALS ----------
+let goalItems = load('goalItems', load('importantItems', []));
+function renderGoals() {
+  const list = document.getElementById('goalList');
+  list.innerHTML = '';
+  if (goalItems.length === 0) {
+    list.innerHTML = '<div class="empty">No goals yet. Add one below.</div>';
+  }
+  const sorted = goalItems.slice().sort((a,b) => (b.pinned?1:0) - (a.pinned?1:0));
+  sorted.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'item-row goal-row';
+    row.innerHTML = `
+      <button class="pin-btn ${item.pinned ? 'pinned' : ''}" data-pin="${item.id}">${item.pinned ? '📌' : '📍'}</button>
+      <span class="label">${escapeHtml(item.text)}</span>
+      <button class="del-btn" data-del="${item.id}">✕</button>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('[data-pin]').forEach(b => {
+    b.addEventListener('click', () => {
+      const item = goalItems.find(i => i.id === b.dataset.pin);
+      item.pinned = !item.pinned;
+      save('goalItems', goalItems);
+      renderGoals();
+    });
+  });
+  list.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', () => {
+      goalItems = goalItems.filter(i => i.id !== b.dataset.del);
+      save('goalItems', goalItems);
+      renderGoals();
+    });
+  });
+}
+function addGoal() {
+  const input = document.getElementById('goalInput');
+  const text = input.value.trim();
+  if (!text) return;
+  goalItems.push({ id: uid(), text, pinned: false });
+  save('goalItems', goalItems);
+  input.value = '';
+  renderGoals();
+}
+document.getElementById('goalInput').addEventListener('keydown', e => { if (e.key === 'Enter') addGoal(); });
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---------- TODO ----------
+let todoItems = load('todoItems', []);
+function renderTodo() {
+  const list = document.getElementById('todoList');
+  list.innerHTML = '';
+  if (todoItems.length === 0) {
+    list.innerHTML = '<div class="empty">No tasks yet. Add one below.</div>';
+  }
+  const sorted = todoItems.slice().sort((a,b) => (a.done?1:0) - (b.done?1:0));
+  sorted.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <input type="checkbox" ${item.done ? 'checked' : ''} data-id="${item.id}">
+      <span class="label ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      <button class="del-btn" data-del="${item.id}">✕</button>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const item = todoItems.find(i => i.id === cb.dataset.id);
+      item.done = cb.checked;
+      save('todoItems', todoItems);
+      renderTodo();
+    });
+  });
+  list.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', () => {
+      todoItems = todoItems.filter(i => i.id !== b.dataset.del);
+      save('todoItems', todoItems);
+      renderTodo();
+    });
+  });
+  const total = todoItems.length;
+  const done = todoItems.filter(i => i.done).length;
+  document.getElementById('todoProgress').textContent = `${done}/${total}`;
+}
+function addTodo() {
+  const input = document.getElementById('todoInput');
+  const text = input.value.trim();
+  if (!text) return;
+  todoItems.push({ id: uid(), text, done: false });
+  save('todoItems', todoItems);
+  input.value = '';
+  renderTodo();
+}
+document.getElementById('todoInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTodo(); });
+
+// ---------- WEEKLY GOALS ----------
+let weeklyTasks = load('weeklyTasks', []);
+let weeklyChecks = load('weeklyChecks', {});
+let wkOffset = 0;
+
+function dateISO(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function getMonday(d) {
+  const date = new Date(d);
+  const day = (date.getDay() + 6) % 7;
+  date.setDate(date.getDate() - day);
+  date.setHours(0,0,0,0);
+  return date;
+}
+function getWeekDates(offset) {
+  const monday = getMonday(new Date());
+  monday.setDate(monday.getDate() + offset * 7);
+  const out = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    out.push(d);
+  }
+  return out;
+}
+
+function pctTier(pct) {
+  if (pct >= 100) return 'high';
+  if (pct >= 50) return 'mid';
+  return 'low';
+}
+
+function renderWeekly() {
+  const weekDates = getWeekDates(wkOffset);
+  const wk = dateISO(weekDates[0]);
+  const todayISO = dateISO(new Date());
+  const dayAbbrev = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  const rangeLabel = weekDates[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+    ' – ' + weekDates[6].toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  document.getElementById('wkRange').textContent = rangeLabel;
+
+  if (!weeklyChecks[wk]) weeklyChecks[wk] = {};
+
+  const overallEl = document.getElementById('wkOverall');
+  const table = document.getElementById('wkTable');
+  if (weeklyTasks.length === 0) {
+    table.innerHTML = '<tr><td style="text-align:left; padding:10px 4px; color:#b3ae9f; font-size:13.5px;">No tasks yet. Add one below to start tracking your week.</td></tr>';
+    overallEl.textContent = '0%';
+    overallEl.className = 'wk-overall low';
+    return;
+  }
+
+  let thead = '<thead><tr><th style="text-align:left;">Task</th>';
+  weekDates.forEach((d, i) => {
+    const iso = dateISO(d);
+    const isToday = iso === todayISO;
+    thead += `<th class="${isToday ? 'wk-today' : ''}">${dayAbbrev[i]}<br>${d.getDate()}</th>`;
+  });
+  thead += '<th>Score</th><th>Goal</th><th>Progress</th><th></th></tr></thead>';
+
+  let tbody = '<tbody>';
+  let totalScore = 0;
+  let totalGoal = 0;
+  weeklyTasks.forEach(task => {
+    if (!weeklyChecks[wk][task.id]) weeklyChecks[wk][task.id] = {};
+    const taskChecks = weeklyChecks[wk][task.id];
+    let score = 0;
+    let cells = '';
+    weekDates.forEach((d) => {
+      const iso = dateISO(d);
+      const isToday = iso === todayISO;
+      const checked = !!taskChecks[iso];
+      if (checked) score++;
+      cells += `<td class="${isToday ? 'wk-today' : ''}"><input type="checkbox" ${checked ? 'checked' : ''} data-task="${task.id}" data-date="${iso}"></td>`;
+    });
+    const goal = task.goal || 1;
+    const pct = Math.min(100, Math.round((score / goal) * 100));
+    const tier = pctTier(pct);
+    totalScore += Math.min(score, goal);
+    totalGoal += goal;
+    tbody += `<tr>
+      <td class="wk-task-cell">${escapeHtml(task.text)}</td>
+      ${cells}
+      <td><span class="wk-score-badge ${tier}">${score}</span></td>
+      <td><input type="number" class="wk-goal-input" min="1" max="7" value="${goal}" inputmode="numeric" data-goal="${task.id}"></td>
+      <td>
+        <div class="wk-progress-cell">
+          <div class="wk-mini-bar-bg"><div class="wk-mini-bar-fill ${tier}" style="width:${pct}%"></div></div>
+          <span style="font-size:11px; color:#9c9686;">${pct}%</span>
+        </div>
+      </td>
+      <td><button class="wk-del" data-del="${task.id}">✕</button></td>
+    </tr>`;
+  });
+  tbody += '</tbody>';
+  table.innerHTML = thead + tbody;
+
+  const overallPct = totalGoal > 0 ? Math.round((totalScore / totalGoal) * 100) : 0;
+  const overallTier = pctTier(overallPct);
+  overallEl.textContent = overallPct + '% complete';
+  overallEl.className = 'wk-overall ' + overallTier;
+
+  table.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const taskId = cb.dataset.task;
+      const iso = cb.dataset.date;
+      if (!weeklyChecks[wk][taskId]) weeklyChecks[wk][taskId] = {};
+      weeklyChecks[wk][taskId][iso] = cb.checked;
+      save('weeklyChecks', weeklyChecks);
+      renderWeekly();
+    });
+  });
+  table.querySelectorAll('[data-goal]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const task = weeklyTasks.find(t => t.id === inp.dataset.goal);
+      const val = parseInt(inp.value, 10);
+      task.goal = (val >= 1 && val <= 7) ? val : 1;
+      save('weeklyTasks', weeklyTasks);
+      renderWeekly();
+    });
+  });
+  table.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', () => {
+      weeklyTasks = weeklyTasks.filter(t => t.id !== b.dataset.del);
+      save('weeklyTasks', weeklyTasks);
+      renderWeekly();
+    });
+  });
+}
+
+function addWeeklyTask() {
+  const input = document.getElementById('wkTaskInput');
+  const goalInput = document.getElementById('wkGoalInput');
+  const text = input.value.trim();
+  let goal = parseInt(goalInput.value, 10);
+  if (!text) return;
+  if (!(goal >= 1 && goal <= 7)) goal = 5;
+  weeklyTasks.push({ id: uid(), text, goal });
+  save('weeklyTasks', weeklyTasks);
+  input.value = '';
+  goalInput.value = '5';
+  renderWeekly();
+}
+document.getElementById('wkTaskInput').addEventListener('keydown', e => { if (e.key === 'Enter') addWeeklyTask(); });
+document.getElementById('wkPrev').addEventListener('click', () => { wkOffset--; renderWeekly(); });
+document.getElementById('wkNext').addEventListener('click', () => { wkOffset++; renderWeekly(); });
+document.getElementById('wkToday').addEventListener('click', () => { wkOffset = 0; renderWeekly(); });
+
+// ---------- init ----------
+renderRoutine();
+renderGoals();
+renderTodo();
+renderWeekly();
+</script>
+</body>
+</html>
