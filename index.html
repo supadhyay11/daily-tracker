@@ -6,550 +6,733 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tracker">
-<meta name="theme-color" content="#f7f6f3">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
 <title>Daily Tracker</title>
 <style>
-  :root { color-scheme: light; }
+  :root {
+    color-scheme: light dark;
+    --bg: #f3f4f6; --card: #ffffff; --text: #111827; --muted: #6b7280; --line: #eceef2;
+    --accent: #4f46e5; --accent-soft: #eef0ff; --on-accent: #ffffff;
+    --red: #dc2626; --red-soft: #fee2e2; --yellow: #d97706; --yellow-soft: #fef3c7; --green: #16a34a; --green-soft: #dcfce7;
+    --input: #ffffff; --shadow: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1115; --card: #181b21; --text: #e8eaee; --muted: #9aa3b2; --line: #272b34;
+      --accent: #818cf8; --accent-soft: #23264f; --on-accent: #0f1115;
+      --red: #f87171; --red-soft: #3b1a1a; --yellow: #fbbf24; --yellow-soft: #3a2d0f; --green: #4ade80; --green-soft: #12301d;
+      --input: #12151a; --shadow: none;
+    }
+  }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: #f7f6f3;
-    color: #2b2b26;
-    padding: calc(14px + env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom));
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+    font-size: 15px; line-height: 1.4;
+    padding: calc(16px + env(safe-area-inset-top)) 14px calc(32px + env(safe-area-inset-bottom));
   }
-  .wrap { max-width: 1080px; margin: 0 auto; }
-  header { margin-bottom: 14px; }
-  h1 { font-size: 22px; margin: 0 0 2px; color: #1f1e1a; }
-  .subdate { color: #7a7568; font-size: 13px; }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+  button, input, textarea, select { font-family: inherit; color: inherit; }
 
-  .authbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; font-size: 13px; color: #7a7568; }
-  .authbar button, .foot button, .foot label {
-    background: #fff; border: 1px solid #e2ded2; border-radius: 8px; padding: 0 12px; min-height: 36px;
-    font-size: 13px; color: #4a463c; cursor: pointer; display: inline-flex; align-items: center; font-family: inherit;
+  /* header */
+  .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .greet { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+  .subdate { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+  .authbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+  .sync-status.ok { color: var(--green); }
+  .sync-status.err { color: var(--red); }
+  .who { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .btn {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; min-height: 36px;
+    font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: var(--shadow);
   }
-  .authbar button.primary { background: #b5652d; border-color: #b5652d; color: #fff; font-weight: 600; }
-  .sync-status { font-size: 12.5px; }
-  .sync-status.ok { color: #3f8f5f; }
-  .sync-status.err { color: #c0554a; }
-  .foot { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-    align-items: start;
-  }
-  @media (min-width: 700px) {
-    .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-  }
+  /* layout */
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (min-width: 760px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } }
+  @media (min-width: 1100px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .span-full { grid-column: 1 / -1; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); min-width: 0; }
+  .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .card-icon { width: 30px; height: 30px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+  .card-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .card-title { font-size: 15.5px; font-weight: 650; flex: 1; }
+  .badge { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--line); color: var(--muted); white-space: nowrap; }
+  .badge.low { background: var(--red-soft); color: var(--red); }
+  .badge.mid { background: var(--yellow-soft); color: var(--yellow); }
+  .badge.high { background: var(--green-soft); color: var(--green); }
+  .badge.streak-b { background: var(--yellow-soft); color: var(--yellow); }
+  .empty { color: var(--muted); font-size: 14px; padding: 8px 0; opacity: .8; }
 
-  .card { background: #ffffff; border: 1px solid #e9e6dc; border-radius: 10px; padding: 16px; min-width: 0; }
+  /* hero */
+  .hero { display: flex; flex-direction: column; gap: 16px; }
+  @media (min-width: 760px) { .hero { flex-direction: row; align-items: center; justify-content: space-between; } }
+  .hero-main { display: flex; align-items: center; gap: 16px; }
+  .ring-wrap { position: relative; width: 84px; height: 84px; flex-shrink: 0; }
+  .ring { width: 84px; height: 84px; }
+  .ring circle { fill: none; stroke-width: 8; }
+  .ring-bg { stroke: var(--line); }
+  .ring-fg { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+  .ring-pct { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; font-size: 18px; }
+  .hero-title { font-size: 18px; font-weight: 700; }
+  .hero-sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  @media (min-width: 560px) { .stats { grid-template-columns: repeat(4, minmax(110px, 1fr)); } }
+  .stat { background: var(--bg); border-radius: 12px; padding: 10px 12px; }
+  .stat-val { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .stat-val.low { color: var(--red); } .stat-val.mid { color: var(--yellow); } .stat-val.high { color: var(--green); }
+  .stat-lbl { font-size: 12px; color: var(--muted); }
+  .stat-sub { font-size: 11.5px; color: var(--red); }
 
-  .section-title {
-    font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: #9c9686;
-    margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+  /* rows */
+  .row { display: flex; align-items: center; gap: 10px; min-height: 46px; border-bottom: 1px solid var(--line); padding: 4px 0; }
+  .row:last-child { border-bottom: none; }
+  input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+  .label { flex: 1; font-size: 15px; word-break: break-word; }
+  .label.done { text-decoration: line-through; color: var(--muted); opacity: .75; }
+  .icon-btn { background: none; border: none; color: var(--muted); opacity: .6; cursor: pointer; font-size: 16px; min-width: 38px; min-height: 38px; border-radius: 8px; }
+  .icon-btn:hover { opacity: 1; color: var(--red); }
+
+  .add { display: flex; gap: 8px; margin-top: 12px; }
+  .add.col { flex-direction: column; }
+  .add-line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  input[type="text"], input[type="date"], input[type="number"], textarea {
+    background: var(--input); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 16px; min-width: 0;
   }
+  input[type="text"] { flex: 1; }
+  input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .add-btn { background: var(--accent); color: var(--on-accent); border: none; border-radius: 10px; padding: 0 18px; min-height: 42px; font-size: 14.5px; font-weight: 600; cursor: pointer; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); padding: 0 6px; min-height: 40px; cursor: pointer; }
+  .chip input { width: 18px; height: 18px; }
 
-  .item-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; min-height: 46px; border-bottom: 1px solid #f1efe8; }
-  .item-row:last-child { border-bottom: none; }
-  .item-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: #b5652d; cursor: pointer; flex-shrink: 0; }
-  .item-row .label { flex: 1; font-size: 15.5px; word-break: break-word; }
-  .item-row .label.done { text-decoration: line-through; color: #ada89a; }
-  .del-btn { background: none; border: none; color: #c7c2b3; cursor: pointer; font-size: 17px; min-width: 40px; min-height: 40px; padding: 2px 6px; }
-  .del-btn:active { color: #c0554a; }
+  .bar { height: 7px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--accent); border-radius: 999px; transition: width .35s ease; }
+  .bar > div.low { background: var(--red); } .bar > div.mid { background: var(--yellow); } .bar > div.high { background: var(--green); }
 
-  .add-row { display: flex; gap: 8px; margin-top: 10px; }
-  .add-row input {
-    flex: 1; min-width: 0; padding: 11px 10px; border: 1px solid #e2ded2; border-radius: 7px;
-    font-size: 16px; font-family: inherit; background: #fffefb;
-  }
-  .add-row button, .wk-add-row button {
-    background: #b5652d; color: #fff; border: none; border-radius: 7px; padding: 0 16px; min-height: 44px; font-size: 15px; cursor: pointer;
-  }
+  /* habits */
+  .habit { padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .habit:last-child { border-bottom: none; }
+  .habit-top { display: flex; align-items: center; gap: 10px; }
+  .dots { display: flex; gap: 5px; margin: 4px 0 0 32px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .dot.on { background: var(--accent); }
+  .dot.now { outline: 2px solid var(--accent-soft); outline-offset: 1px; }
 
-  .empty { color: #b3ae9f; font-size: 14px; padding: 6px 0; }
-  .streak { font-size: 12px; color: #8a8574; background: #f2f0e8; padding: 3px 8px; border-radius: 20px; }
+  /* todo / goals meta */
+  .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 3px; }
+  .tag { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--line); color: var(--muted); }
+  .tag.over { background: var(--red-soft); color: var(--red); }
+  .tag.today { background: var(--yellow-soft); color: var(--yellow); }
+  .tag.hi { background: var(--red-soft); color: var(--red); }
+  .row-body { flex: 1; min-width: 0; }
+  .link-btn { background: none; border: none; color: var(--accent); font-size: 13px; cursor: pointer; padding: 8px 0; }
+  .goal { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .goal:last-child { border-bottom: none; }
+  .goal-top { display: flex; align-items: center; gap: 6px; }
+  .goal-title { flex: 1; font-weight: 600; font-size: 15px; word-break: break-word; }
+  .goal-title.done { color: var(--green); }
+  .pin-btn { background: none; border: none; cursor: pointer; font-size: 15px; min-width: 34px; min-height: 36px; }
+  .pin-btn:not(.pinned) { opacity: .3; }
+  .goal-prog { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .goal-prog input[type="range"] { flex: 1; accent-color: var(--accent); height: 28px; }
+  .goal-pct { font-size: 13px; font-weight: 700; min-width: 40px; text-align: right; }
 
-  .goal-row .label { font-weight: 500; }
-  .pin-btn { background: none; border: none; cursor: pointer; font-size: 16px; min-width: 32px; min-height: 40px; padding: 2px 4px; }
-  .pin-btn:not(.pinned) { opacity: 0.3; }
+  /* weekly */
+  .wk-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .wk-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; }
+  .wk-range { font-size: 13.5px; color: var(--muted); font-weight: 500; }
+  .wk-btns { display: flex; gap: 6px; }
+  .wk-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+  .wk-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; min-width: 640px; }
+  .wk-table th, .wk-table td { padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--line); background: var(--card); }
+  .wk-table th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  .wk-table th:first-child, .wk-table td:first-child { position: sticky; left: 0; z-index: 1; text-align: left; min-width: 120px; max-width: 160px; box-shadow: 1px 0 0 var(--line); }
+  .wk-table th.today, .wk-table td.today { background: var(--accent-soft); }
+  .wk-task { font-size: 14px; font-weight: 500; word-break: break-word; }
+  .wk-table input[type="checkbox"] { width: 20px; height: 20px; }
+  .wk-goal-input { width: 46px; padding: 6px 4px !important; text-align: center; font-size: 16px; }
+  .mini { display: flex; align-items: center; gap: 6px; min-width: 96px; }
+  .mini .bar { flex: 1; height: 6px; }
+  .mini span { font-size: 11px; color: var(--muted); min-width: 30px; text-align: right; }
+  .score { font-weight: 700; } .score.low { color: var(--red); } .score.mid { color: var(--yellow); } .score.high { color: var(--green); }
+  .hint { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+  @media (min-width: 760px) { .hint.swipe { display: none; } }
+  .wk-lower { display: grid; gap: 16px; margin-top: 16px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 760px) { .wk-lower { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } }
+  .sub-title { font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+  .hist { display: flex; align-items: flex-end; gap: 8px; height: 96px; }
+  .hist-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .hist-bar { width: 100%; max-width: 38px; border-radius: 6px 6px 3px 3px; min-height: 4px; background: var(--accent); opacity: .85; }
+  .hist-bar.low { background: var(--red); } .hist-bar.mid { background: var(--yellow); } .hist-bar.high { background: var(--green); }
+  .hist-bar.cur { opacity: 1; outline: 2px solid var(--accent-soft); }
+  .hist-val { font-size: 11px; font-weight: 600; }
+  .hist-lbl { font-size: 10.5px; color: var(--muted); }
+  textarea { width: 100%; min-height: 92px; resize: vertical; line-height: 1.45; }
 
-  .progress-bar-bg { height: 6px; background: #eeece3; border-radius: 4px; overflow: hidden; margin-top: 10px; }
-  .progress-bar-fill { height: 100%; background: #b5652d; border-radius: 4px; transition: width 0.3s; }
-
-  .wk-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-  .wk-nav .wk-range { font-size: 13.5px; font-weight: 500; color: #4a463c; }
-  .wk-nav-btns { display: flex; gap: 6px; }
-  .wk-nav-btns button {
-    background: #f2f0e8; border: 1px solid #e9e6dc; border-radius: 7px; padding: 0 11px; min-height: 38px; font-size: 13px; cursor: pointer; color: #6f6a5c;
-  }
-
-  .wk-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .wk-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 620px; }
-  .wk-table th, .wk-table td { padding: 7px 5px; text-align: center; border-bottom: 1px solid #f1efe8; }
-  .wk-table th { color: #9c9686; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
-  .wk-table th.wk-today, .wk-table td.wk-today { background: #fbf3ea; }
-  .wk-task-cell { text-align: left !important; font-size: 13.5px; min-width: 110px; display: flex; align-items: center; gap: 6px; }
-  .wk-table input[type="checkbox"] { width: 20px; height: 20px; accent-color: #b5652d; cursor: pointer; }
-  .wk-goal-input { width: 44px; padding: 6px 4px; border: 1px solid #e2ded2; border-radius: 5px; font-size: 16px; text-align: center; font-family: inherit; }
-  .wk-progress-cell { display: flex; align-items: center; gap: 6px; min-width: 90px; }
-  .wk-mini-bar-bg { flex: 1; height: 5px; background: #eeece3; border-radius: 3px; overflow: hidden; }
-  .wk-mini-bar-fill { height: 100%; background: #b5652d; }
-  .wk-mini-bar-fill.low { background: #c0554a; }
-  .wk-mini-bar-fill.mid { background: #d9a441; }
-  .wk-mini-bar-fill.high { background: #3f8f5f; }
-  .wk-score-badge { font-weight: 600; font-size: 12.5px; color: #6f6a5c; }
-  .wk-score-badge.low { color: #c0554a; }
-  .wk-score-badge.mid { color: #a97a1f; }
-  .wk-score-badge.high { color: #3f8f5f; }
-  .wk-overall { font-size: 12.5px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
-  .wk-overall.low { background: #f7e6e2; color: #c0554a; }
-  .wk-overall.mid { background: #faf1de; color: #a97a1f; }
-  .wk-overall.high { background: #e6f2ea; color: #3f8f5f; }
-  .wk-del { background: none; border: none; color: #c7c2b3; cursor: pointer; font-size: 15px; min-width: 36px; min-height: 36px; }
-  .wk-add-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; flex-wrap: wrap; }
-  .wk-add-row input[type="text"] {
-    flex: 1; min-width: 180px; padding: 11px 10px; border: 1px solid #e2ded2; border-radius: 7px;
-    font-size: 16px; font-family: inherit; background: #fffefb;
-  }
-  .wk-add-row label { font-size: 12.5px; color: #9c9686; white-space: nowrap; }
-  .wk-add-row input[type="number"] {
-    width: 56px; padding: 11px 6px; border: 1px solid #e2ded2; border-radius: 7px;
-    font-size: 16px; font-family: inherit; background: #fffefb; text-align: center;
-  }
-  .scroll-hint { font-size: 11.5px; color: #b3ae9f; margin: 6px 0 0; }
-  @media (min-width: 700px) { .scroll-hint { display: none; } }
+  .foot { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 12px; }
+  .foot label.btn input { display: none; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>Daily Tracker</h1>
-    <div class="subdate" id="todayLabel"></div>
+  <header class="topbar">
+    <div>
+      <div class="greet" id="greeting">Hello</div>
+      <div class="subdate" id="todayLabel"></div>
+    </div>
     <div class="authbar" id="authBar"><span class="sync-status">Saved on this device only</span></div>
   </header>
 
-  <div class="dashboard-grid">
+  <main class="grid">
+
+    <!-- HERO -->
+    <section class="card hero span-full">
+      <div class="hero-main">
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 84 84" aria-hidden="true">
+            <circle class="ring-bg" cx="42" cy="42" r="34"></circle>
+            <circle class="ring-fg" id="ringFg" cx="42" cy="42" r="34" stroke-dasharray="213.63" stroke-dashoffset="213.63" transform="rotate(-90 42 42)"></circle>
+          </svg>
+          <div class="ring-pct" id="ringPct">0%</div>
+        </div>
+        <div>
+          <div class="hero-title">Today</div>
+          <div class="hero-sub" id="heroSub">Add your focus and routine to get started.</div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-val" id="stStreak">0</div><div class="stat-lbl">Day streak</div></div>
+        <div class="stat"><div class="stat-val" id="stOpen">0</div><div class="stat-lbl">Open to-dos</div><div class="stat-sub" id="stOver"></div></div>
+        <div class="stat"><div class="stat-val" id="stWeek">0%</div><div class="stat-lbl">This week</div></div>
+        <div class="stat"><div class="stat-val" id="stGoals">—</div><div class="stat-lbl">Goals progress</div></div>
+      </div>
+    </section>
+
+    <!-- FOCUS -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 4h12l-2 4 2 4H5"/></svg></div>
+        <div class="card-title">Today's focus</div>
+        <span class="badge" id="focusBadge">0/0</span>
+      </div>
+      <div id="focusList"></div>
+      <div class="add" id="focusAdd">
+        <input type="text" id="focusInput" placeholder="What must get done today?" enterkeyhint="done" maxlength="120">
+        <button class="add-btn" onclick="addFocus()">Add</button>
+      </div>
+      <div class="hint" id="focusHint">Pick up to 3 priorities. They reset every day.</div>
+    </section>
 
     <!-- ROUTINE -->
-    <div class="card">
-      <div class="section-title">
-        <span>Today's Routine</span>
-        <span class="streak" id="routineProgress">0/0</span>
+    <section class="card">
+      <div class="card-head">
+        <div class="card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div>
+        <div class="card-title">Daily routine</div>
+        <span class="badge" id="routineBadge">0/0</span>
       </div>
       <div id="routineList"></div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="routineBar" style="width:0%"></div></div>
-      <div class="add-row">
-        <input type="text" id="routineInput" placeholder="Add a routine item" enterkeyhint="done">
-        <button onclick="addRoutine()">Add</button>
+      <div class="bar" style="margin-top:10px"><div id="routineBar" style="width:0%"></div></div>
+      <div class="add">
+        <input type="text" id="routineInput" placeholder="Add a daily habit" enterkeyhint="done" maxlength="80">
+        <button class="add-btn" onclick="addRoutine()">Add</button>
       </div>
-    </div>
-
-    <!-- GOALS -->
-    <div class="card">
-      <div class="section-title"><span>Goals</span></div>
-      <div id="goalList"></div>
-      <div class="add-row">
-        <input type="text" id="goalInput" placeholder="Add a goal" enterkeyhint="done">
-        <button onclick="addGoal()">Add</button>
-      </div>
-    </div>
+      <div class="hint">Dots show the last 7 days. A number shows your current streak.</div>
+    </section>
 
     <!-- TODO -->
-    <div class="card">
-      <div class="section-title">
-        <span>To-Do List</span>
-        <span class="streak" id="todoProgress">0/0</span>
+    <section class="card">
+      <div class="card-head">
+        <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg></div>
+        <div class="card-title">To-do list</div>
+        <span class="badge" id="todoBadge">0/0</span>
       </div>
       <div id="todoList"></div>
-      <div class="add-row">
-        <input type="text" id="todoInput" placeholder="Add a task" enterkeyhint="done">
-        <button onclick="addTodo()">Add</button>
+      <div id="todoDoneWrap"></div>
+      <div class="add col">
+        <input type="text" id="todoInput" placeholder="Add a task" enterkeyhint="done" maxlength="160">
+        <div class="add-line">
+          <input type="date" id="todoDue" aria-label="Due date">
+          <label class="chip"><input type="checkbox" id="todoPri"> High priority</label>
+          <button class="add-btn" style="margin-left:auto" onclick="addTodo()">Add</button>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <!-- WEEKLY GOALS -->
-    <div class="card span-full">
-      <div class="wk-nav">
-        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          <span class="section-title" style="margin-bottom:0;">Weekly Goals</span>
+    <!-- GOALS -->
+    <section class="card span-full">
+      <div class="card-head">
+        <div class="card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div>
+        <div class="card-title">Goals</div>
+        <span class="badge" id="goalBadge">0</span>
+      </div>
+      <div id="goalList"></div>
+      <div class="add-line" style="margin-top:12px">
+        <input type="text" id="goalInput" placeholder="Add a goal" enterkeyhint="done" maxlength="140" style="flex:1 1 220px">
+        <input type="date" id="goalDue" aria-label="Target date">
+        <button class="add-btn" onclick="addGoal()">Add</button>
+      </div>
+    </section>
+
+    <!-- WEEKLY -->
+    <section class="card span-full">
+      <div class="wk-head">
+        <div class="wk-left">
+          <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div>
+          <div class="card-title" style="flex:none">Weekly goals</div>
           <span class="wk-range" id="wkRange"></span>
-          <span class="wk-overall" id="wkOverall">0%</span>
+          <span class="badge" id="wkOverall">0%</span>
         </div>
-        <div class="wk-nav-btns">
-          <button id="wkPrev">◀ Prev</button>
-          <button id="wkToday">This Week</button>
-          <button id="wkNext">Next ▶</button>
+        <div class="wk-btns">
+          <button class="btn" id="wkPrev" aria-label="Previous week">◀</button>
+          <button class="btn" id="wkToday">This week</button>
+          <button class="btn" id="wkNext" aria-label="Next week">▶</button>
         </div>
       </div>
-      <div class="wk-table-wrap">
-        <table class="wk-table" id="wkTable"></table>
+      <div class="wk-table-wrap"><table class="wk-table" id="wkTable"></table></div>
+      <p class="hint swipe">Swipe the table sideways to see all days →</p>
+      <div class="add-line" style="margin-top:12px">
+        <input type="text" id="wkTaskInput" placeholder="Add a task to track weekly (e.g. Read 20 min)" enterkeyhint="done" maxlength="80" style="flex:1 1 220px">
+        <label class="chip" for="wkGoalInput">Days / week</label>
+        <input type="number" id="wkGoalInput" min="1" max="7" value="5" inputmode="numeric" style="width:64px;text-align:center">
+        <button class="add-btn" onclick="addWeeklyTask()">Add</button>
       </div>
-      <p class="scroll-hint">Swipe the table sideways to see all days →</p>
-      <div class="wk-add-row">
-        <input type="text" id="wkTaskInput" placeholder="Add a task to track (e.g. Read 20 min)" enterkeyhint="done">
-        <label for="wkGoalInput">Goal / week</label>
-        <input type="number" id="wkGoalInput" min="1" max="7" value="5" inputmode="numeric">
-        <button onclick="addWeeklyTask()">Add</button>
+      <div class="wk-lower">
+        <div>
+          <div class="sub-title">Last 6 weeks</div>
+          <div class="hist" id="wkHist"></div>
+        </div>
+        <div>
+          <div class="sub-title">Weekly review — what went well, what to fix?</div>
+          <textarea id="wkNote" placeholder="Write a few lines for the week shown above. Be honest: it's for you."></textarea>
+        </div>
       </div>
-    </div>
+    </section>
 
-  </div>
+  </main>
 
   <div class="foot">
-    <button id="exportBtn">Export data</button>
-    <label>Import data<input type="file" id="importFile" accept="application/json,.json" hidden></label>
+    <button class="btn" id="exportBtn">Export data</button>
+    <label class="btn">Import data<input type="file" id="importFile" accept="application/json,.json"></label>
+    <span>Sign in (top right) to sync across devices.</span>
   </div>
 </div>
 
 <script>
-// ---------- utilities ----------
+// ---------- helpers ----------
 let applyingRemote = false;
 window.cloudSignedIn = false;
-
-function todayKey() {
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-}
-function load(key, fallback) {
-  try {
-    const v = localStorage.getItem(key);
-    return v ? JSON.parse(v) : fallback;
-  } catch(e) { return fallback; }
-}
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const todayKey = () => ymd(new Date());
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function parseYMD(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+function fmtShort(s) { return parseYMD(s).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
+function daysBetween(a, b) { return Math.round((parseYMD(b) - parseYMD(a)) / 86400000); }
+function getMonday(d) { const x = new Date(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); x.setHours(0, 0, 0, 0); return x; }
+function pctTier(p) { return p >= 100 ? 'high' : p >= 50 ? 'mid' : 'low'; }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function load(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } }
 function save(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
   if (applyingRemote) return;
-  if (!window.cloudSignedIn) { try { localStorage.setItem('trackerDirty', '1'); } catch(e) {} }
+  if (!window.cloudSignedIn) { try { localStorage.setItem('trackerDirty', '1'); } catch (e) {} }
   if (window.cloudPush) window.cloudPush();
 }
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
+function onEnter(id, fn) { $(id).addEventListener('keydown', e => { if (e.key === 'Enter') fn(); }); }
 
-document.getElementById('todayLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-// ---------- ROUTINE ----------
+// ---------- state ----------
 let routineItems = load('routineItems', [
-  { id: 'r-workout', text: 'Morning workout' },
-  { id: 'r-water', text: 'Drink water' },
-  { id: 'r-priorities', text: 'Review priorities' }
+  { id: 'r-workout', text: 'Morning workout' }, { id: 'r-water', text: 'Drink water' }, { id: 'r-priorities', text: 'Review priorities' }
 ]);
 let routineChecks = load('routineChecks', {});
-
-function renderRoutine() {
-  const list = document.getElementById('routineList');
-  const key = todayKey();
-  const checksToday = routineChecks[key] || {};
-  list.innerHTML = '';
-  if (routineItems.length === 0) {
-    list.innerHTML = '<div class="empty">No routine items yet. Add one below.</div>';
-  }
-  routineItems.forEach(item => {
-    const row = document.createElement('div');
-    row.className = 'item-row';
-    const checked = !!checksToday[item.id];
-    row.innerHTML = `
-      <input type="checkbox" ${checked ? 'checked' : ''} data-id="${item.id}">
-      <span class="label ${checked ? 'done' : ''}">${escapeHtml(item.text)}</span>
-      <button class="del-btn" data-del="${item.id}">✕</button>
-    `;
-    list.appendChild(row);
-  });
-  list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const id = cb.dataset.id;
-      const key = todayKey();
-      if (!routineChecks[key]) routineChecks[key] = {};
-      routineChecks[key][id] = cb.checked;
-      save('routineChecks', routineChecks);
-      renderRoutine();
-    });
-  });
-  list.querySelectorAll('[data-del]').forEach(b => {
-    b.addEventListener('click', () => {
-      routineItems = routineItems.filter(i => i.id !== b.dataset.del);
-      save('routineItems', routineItems);
-      renderRoutine();
-    });
-  });
-  const total = routineItems.length;
-  const done = routineItems.filter(i => checksToday[i.id]).length;
-  document.getElementById('routineProgress').textContent = `${done}/${total}`;
-  document.getElementById('routineBar').style.width = total ? (done/total*100) + '%' : '0%';
-}
-function addRoutine() {
-  const input = document.getElementById('routineInput');
-  const text = input.value.trim();
-  if (!text) return;
-  routineItems.push({ id: uid(), text });
-  save('routineItems', routineItems);
-  input.value = '';
-  renderRoutine();
-}
-document.getElementById('routineInput').addEventListener('keydown', e => { if (e.key === 'Enter') addRoutine(); });
-
-// ---------- GOALS ----------
 let goalItems = load('goalItems', load('importantItems', []));
-function renderGoals() {
-  const list = document.getElementById('goalList');
-  list.innerHTML = '';
-  if (goalItems.length === 0) {
-    list.innerHTML = '<div class="empty">No goals yet. Add one below.</div>';
-  }
-  const sorted = goalItems.slice().sort((a,b) => (b.pinned?1:0) - (a.pinned?1:0));
-  sorted.forEach(item => {
-    const row = document.createElement('div');
-    row.className = 'item-row goal-row';
-    row.innerHTML = `
-      <button class="pin-btn ${item.pinned ? 'pinned' : ''}" data-pin="${item.id}">${item.pinned ? '📌' : '📍'}</button>
-      <span class="label">${escapeHtml(item.text)}</span>
-      <button class="del-btn" data-del="${item.id}">✕</button>
-    `;
-    list.appendChild(row);
-  });
-  list.querySelectorAll('[data-pin]').forEach(b => {
-    b.addEventListener('click', () => {
-      const item = goalItems.find(i => i.id === b.dataset.pin);
-      item.pinned = !item.pinned;
-      save('goalItems', goalItems);
-      renderGoals();
-    });
-  });
-  list.querySelectorAll('[data-del]').forEach(b => {
-    b.addEventListener('click', () => {
-      goalItems = goalItems.filter(i => i.id !== b.dataset.del);
-      save('goalItems', goalItems);
-      renderGoals();
-    });
-  });
-}
-function addGoal() {
-  const input = document.getElementById('goalInput');
-  const text = input.value.trim();
-  if (!text) return;
-  goalItems.push({ id: uid(), text, pinned: false });
-  save('goalItems', goalItems);
-  input.value = '';
-  renderGoals();
-}
-document.getElementById('goalInput').addEventListener('keydown', e => { if (e.key === 'Enter') addGoal(); });
-
-// ---------- TODO ----------
 let todoItems = load('todoItems', []);
-function renderTodo() {
-  const list = document.getElementById('todoList');
-  list.innerHTML = '';
-  if (todoItems.length === 0) {
-    list.innerHTML = '<div class="empty">No tasks yet. Add one below.</div>';
-  }
-  const sorted = todoItems.slice().sort((a,b) => (a.done?1:0) - (b.done?1:0));
-  sorted.forEach(item => {
-    const row = document.createElement('div');
-    row.className = 'item-row';
-    row.innerHTML = `
-      <input type="checkbox" ${item.done ? 'checked' : ''} data-id="${item.id}">
-      <span class="label ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
-      <button class="del-btn" data-del="${item.id}">✕</button>
-    `;
-    list.appendChild(row);
-  });
-  list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const item = todoItems.find(i => i.id === cb.dataset.id);
-      item.done = cb.checked;
-      save('todoItems', todoItems);
-      renderTodo();
-    });
-  });
-  list.querySelectorAll('[data-del]').forEach(b => {
-    b.addEventListener('click', () => {
-      todoItems = todoItems.filter(i => i.id !== b.dataset.del);
-      save('todoItems', todoItems);
-      renderTodo();
-    });
-  });
-  const total = todoItems.length;
-  const done = todoItems.filter(i => i.done).length;
-  document.getElementById('todoProgress').textContent = `${done}/${total}`;
-}
-function addTodo() {
-  const input = document.getElementById('todoInput');
-  const text = input.value.trim();
-  if (!text) return;
-  todoItems.push({ id: uid(), text, done: false });
-  save('todoItems', todoItems);
-  input.value = '';
-  renderTodo();
-}
-document.getElementById('todoInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTodo(); });
-
-// ---------- WEEKLY GOALS ----------
 let weeklyTasks = load('weeklyTasks', []);
 let weeklyChecks = load('weeklyChecks', {});
+let focusByDate = load('focusByDate', {});
+let weeklyNotes = load('weeklyNotes', {});
 let wkOffset = 0;
+let showDone = false;
+let userName = '';
 
-function dateISO(d) {
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+// ---------- greeting ----------
+function renderGreeting() {
+  const h = new Date().getHours();
+  const part = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  $('greeting').textContent = part + (userName ? ', ' + userName : '');
+  $('todayLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
-function getMonday(d) {
-  const date = new Date(d);
-  const day = (date.getDay() + 6) % 7;
-  date.setDate(date.getDate() - day);
-  date.setHours(0,0,0,0);
-  return date;
+window.setUserName = n => { userName = n ? String(n).split(' ')[0] : ''; renderGreeting(); };
+
+// ---------- streaks ----------
+function routineDayComplete(ds) {
+  if (!routineItems.length) return false;
+  const c = routineChecks[ds] || {};
+  return routineItems.every(i => c[i.id]);
 }
-function getWeekDates(offset) {
-  const monday = getMonday(new Date());
-  monday.setDate(monday.getDate() + offset * 7);
-  const out = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    out.push(d);
+function streakFrom(testFn) {
+  let d = new Date(); d.setHours(0, 0, 0, 0);
+  if (!testFn(ymd(d))) d = addDays(d, -1);
+  let n = 0;
+  while (testFn(ymd(d)) && n < 3650) { n++; d = addDays(d, -1); }
+  return n;
+}
+const overallStreak = () => streakFrom(routineDayComplete);
+const habitStreak = id => streakFrom(ds => !!(routineChecks[ds] || {})[id]);
+
+// ---------- summary ----------
+function weekPctFor(monday) {
+  const wk = ymd(monday); let s = 0, g = 0;
+  weeklyTasks.forEach(t => {
+    const chk = (weeklyChecks[wk] || {})[t.id] || {};
+    let sc = 0;
+    for (let i = 0; i < 7; i++) if (chk[ymd(addDays(monday, i))]) sc++;
+    const goal = t.goal || 1; s += Math.min(sc, goal); g += goal;
+  });
+  return g ? Math.round(s / g * 100) : 0;
+}
+function renderSummary() {
+  const today = todayKey();
+  const rc = routineChecks[today] || {};
+  const rDone = routineItems.filter(i => rc[i.id]).length;
+  const f = focusByDate[today] || [];
+  const fDone = f.filter(x => x.done).length;
+  const tot = routineItems.length + f.length, done = rDone + fDone;
+  const pct = tot ? Math.round(done / tot * 100) : 0;
+  $('ringFg').style.strokeDashoffset = 213.63 * (1 - pct / 100);
+  $('ringPct').textContent = pct + '%';
+  $('heroSub').textContent = !tot ? 'Add your focus and routine to get started.'
+    : pct === 100 ? 'Everything done today. Nice work.'
+    : (tot - done) + ' thing' + (tot - done === 1 ? '' : 's') + ' left today.';
+  $('stStreak').textContent = overallStreak();
+  const open = todoItems.filter(t => !t.done);
+  const overdue = open.filter(t => t.due && t.due < today).length;
+  $('stOpen').textContent = open.length;
+  $('stOver').textContent = overdue ? overdue + ' overdue' : '';
+  const wp = weekPctFor(getMonday(new Date()));
+  $('stWeek').textContent = wp + '%';
+  $('stWeek').className = 'stat-val ' + (weeklyTasks.length ? pctTier(wp) : '');
+  if (goalItems.length) {
+    const avg = Math.round(goalItems.reduce((a, g) => a + (g.progress || 0), 0) / goalItems.length);
+    $('stGoals').textContent = avg + '%';
+  } else $('stGoals').textContent = '—';
+}
+
+// ---------- focus ----------
+function renderFocus() {
+  const key = todayKey();
+  const list = focusByDate[key] || [];
+  const box = $('focusList');
+  box.innerHTML = list.length ? '' : '<div class="empty">No priorities set for today yet.</div>';
+  list.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<input type="checkbox" ${it.done ? 'checked' : ''} data-id="${it.id}" aria-label="Done"><span class="label ${it.done ? 'done' : ''}">${escapeHtml(it.text)}</span><button class="icon-btn" data-del="${it.id}" aria-label="Delete">✕</button>`;
+    box.appendChild(row);
+  });
+  box.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', () => {
+    list.find(x => x.id === cb.dataset.id).done = cb.checked;
+    save('focusByDate', focusByDate); renderFocus();
+  }));
+  box.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+    focusByDate[key] = list.filter(x => x.id !== b.dataset.del);
+    save('focusByDate', focusByDate); renderFocus();
+  }));
+  $('focusBadge').textContent = list.filter(x => x.done).length + '/' + list.length;
+  const full = list.length >= 3;
+  $('focusAdd').style.display = full ? 'none' : 'flex';
+  $('focusHint').textContent = full ? 'Three priorities is the limit. Finish one to focus on what matters.' : 'Pick up to 3 priorities. They reset every day.';
+  renderSummary();
+}
+function addFocus() {
+  const key = todayKey(); const t = $('focusInput').value.trim();
+  if (!t) return;
+  const list = focusByDate[key] || [];
+  if (list.length >= 3) return;
+  list.push({ id: uid(), text: t, done: false });
+  focusByDate[key] = list;
+  save('focusByDate', focusByDate); $('focusInput').value = ''; renderFocus();
+}
+onEnter('focusInput', addFocus);
+
+// ---------- routine ----------
+function renderRoutine() {
+  const box = $('routineList');
+  const today = todayKey();
+  const checks = routineChecks[today] || {};
+  box.innerHTML = routineItems.length ? '' : '<div class="empty">No habits yet. Add one below.</div>';
+  const days = [];
+  for (let i = 6; i >= 0; i--) days.push(ymd(addDays(new Date(), -i)));
+  routineItems.forEach(item => {
+    const done = !!checks[item.id];
+    const st = habitStreak(item.id);
+    const dots = days.map((d, i) => `<span class="dot ${(routineChecks[d] || {})[item.id] ? 'on' : ''} ${i === 6 ? 'now' : ''}" title="${d}"></span>`).join('');
+    const row = document.createElement('div');
+    row.className = 'habit';
+    row.innerHTML = `<div class="habit-top"><input type="checkbox" ${done ? 'checked' : ''} data-id="${item.id}" aria-label="Done today"><span class="label ${done ? 'done' : ''}">${escapeHtml(item.text)}</span>${st > 1 ? `<span class="badge streak-b">${st}d</span>` : ''}<button class="icon-btn" data-del="${item.id}" aria-label="Delete">✕</button></div><div class="dots">${dots}</div>`;
+    box.appendChild(row);
+  });
+  box.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', () => {
+    const k = todayKey();
+    if (!routineChecks[k]) routineChecks[k] = {};
+    routineChecks[k][cb.dataset.id] = cb.checked;
+    save('routineChecks', routineChecks); renderRoutine();
+  }));
+  box.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+    routineItems = routineItems.filter(i => i.id !== b.dataset.del);
+    save('routineItems', routineItems); renderRoutine();
+  }));
+  const total = routineItems.length, n = routineItems.filter(i => checks[i.id]).length;
+  const pct = total ? Math.round(n / total * 100) : 0;
+  $('routineBadge').textContent = n + '/' + total;
+  $('routineBar').style.width = pct + '%';
+  $('routineBar').className = total ? pctTier(pct) : '';
+  renderSummary();
+}
+function addRoutine() {
+  const t = $('routineInput').value.trim();
+  if (!t) return;
+  routineItems.push({ id: uid(), text: t });
+  save('routineItems', routineItems); $('routineInput').value = ''; renderRoutine();
+}
+onEnter('routineInput', addRoutine);
+
+// ---------- todo ----------
+function dueInfo(due) {
+  if (!due) return null;
+  const t = todayKey();
+  if (due < t) return { cls: 'over', text: 'Overdue · ' + fmtShort(due) };
+  if (due === t) return { cls: 'today', text: 'Due today' };
+  const d = daysBetween(t, due);
+  return { cls: '', text: d === 1 ? 'Due tomorrow' : 'Due ' + fmtShort(due) };
+}
+function todoRow(item) {
+  const info = !item.done ? dueInfo(item.due) : null;
+  const meta = [];
+  if (item.priority && !item.done) meta.push('<span class="tag hi">High</span>');
+  if (info) meta.push(`<span class="tag ${info.cls}">${info.text}</span>`);
+  else if (item.due && item.done) meta.push(`<span class="tag">${fmtShort(item.due)}</span>`);
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<input type="checkbox" ${item.done ? 'checked' : ''} data-id="${item.id}" aria-label="Done"><div class="row-body"><div class="label ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</div>${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}</div><button class="icon-btn" data-del="${item.id}" aria-label="Delete">✕</button>`;
+  return row;
+}
+function renderTodo() {
+  const open = todoItems.filter(t => !t.done).sort((a, b) =>
+    (b.priority ? 1 : 0) - (a.priority ? 1 : 0) || (a.due || '9999').localeCompare(b.due || '9999'));
+  const done = todoItems.filter(t => t.done);
+  const list = $('todoList');
+  list.innerHTML = open.length ? '' : '<div class="empty">Nothing open. Add a task below.</div>';
+  open.forEach(t => list.appendChild(todoRow(t)));
+  const dw = $('todoDoneWrap');
+  dw.innerHTML = '';
+  if (done.length) {
+    const tog = document.createElement('button');
+    tog.className = 'link-btn';
+    tog.textContent = (showDone ? 'Hide' : 'Show') + ' completed (' + done.length + ')';
+    tog.addEventListener('click', () => { showDone = !showDone; renderTodo(); });
+    dw.appendChild(tog);
+    if (showDone) {
+      done.forEach(t => dw.appendChild(todoRow(t)));
+      const clr = document.createElement('button');
+      clr.className = 'link-btn';
+      clr.textContent = 'Clear completed';
+      clr.addEventListener('click', () => { todoItems = todoItems.filter(t => !t.done); save('todoItems', todoItems); renderTodo(); });
+      dw.appendChild(clr);
+    }
   }
-  return out;
+  [list, dw].forEach(c => {
+    c.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', () => {
+      todoItems.find(i => i.id === cb.dataset.id).done = cb.checked;
+      save('todoItems', todoItems); renderTodo();
+    }));
+    c.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+      todoItems = todoItems.filter(i => i.id !== b.dataset.del);
+      save('todoItems', todoItems); renderTodo();
+    }));
+  });
+  $('todoBadge').textContent = done.length + '/' + todoItems.length;
+  renderSummary();
 }
-function pctTier(pct) {
-  if (pct >= 100) return 'high';
-  if (pct >= 50) return 'mid';
-  return 'low';
+function addTodo() {
+  const t = $('todoInput').value.trim();
+  if (!t) return;
+  todoItems.push({ id: uid(), text: t, done: false, due: $('todoDue').value || '', priority: $('todoPri').checked });
+  save('todoItems', todoItems);
+  $('todoInput').value = ''; $('todoDue').value = ''; $('todoPri').checked = false;
+  renderTodo();
 }
+onEnter('todoInput', addTodo);
 
+// ---------- goals ----------
+function renderGoals() {
+  const box = $('goalList');
+  box.innerHTML = goalItems.length ? '' : '<div class="empty">No goals yet. Add one below and track your progress.</div>';
+  const sorted = goalItems.slice().sort((a, b) =>
+    ((a.progress || 0) >= 100 ? 1 : 0) - ((b.progress || 0) >= 100 ? 1 : 0) || (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  const today = todayKey();
+  sorted.forEach(g => {
+    const p = g.progress || 0;
+    let due = '';
+    if (g.due) {
+      const d = daysBetween(today, g.due);
+      if (p >= 100) due = '<span class="tag">Done</span>';
+      else if (d < 0) due = `<span class="tag over">${-d} day${d === -1 ? '' : 's'} overdue</span>`;
+      else due = `<span class="tag ${d <= 14 ? 'today' : ''}">${d === 0 ? 'Due today' : d + ' day' + (d === 1 ? '' : 's') + ' left'} · ${fmtShort(g.due)}</span>`;
+    }
+    const row = document.createElement('div');
+    row.className = 'goal';
+    row.innerHTML = `<div class="goal-top"><button class="pin-btn ${g.pinned ? 'pinned' : ''}" data-pin="${g.id}" aria-label="Pin">${g.pinned ? '📌' : '📍'}</button><div class="goal-title ${p >= 100 ? 'done' : ''}">${escapeHtml(g.text)}</div><button class="icon-btn" data-del="${g.id}" aria-label="Delete">✕</button></div>
+      ${due ? `<div class="meta" style="margin-left:40px">${due}</div>` : ''}
+      <div class="goal-prog"><input type="range" min="0" max="100" step="5" value="${p}" data-prog="${g.id}" aria-label="Progress"><div class="goal-pct" id="gp-${g.id}">${p}%</div></div>`;
+    box.appendChild(row);
+  });
+  box.querySelectorAll('[data-pin]').forEach(b => b.addEventListener('click', () => {
+    const g = goalItems.find(i => i.id === b.dataset.pin); g.pinned = !g.pinned;
+    save('goalItems', goalItems); renderGoals();
+  }));
+  box.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+    goalItems = goalItems.filter(i => i.id !== b.dataset.del);
+    save('goalItems', goalItems); renderGoals();
+  }));
+  box.querySelectorAll('[data-prog]').forEach(r => {
+    r.addEventListener('input', () => { $('gp-' + r.dataset.prog).textContent = r.value + '%'; });
+    r.addEventListener('change', () => {
+      goalItems.find(i => i.id === r.dataset.prog).progress = parseInt(r.value, 10);
+      save('goalItems', goalItems); renderGoals();
+    });
+  });
+  const doneN = goalItems.filter(g => (g.progress || 0) >= 100).length;
+  $('goalBadge').textContent = doneN + '/' + goalItems.length + ' done';
+  renderSummary();
+}
+function addGoal() {
+  const t = $('goalInput').value.trim();
+  if (!t) return;
+  goalItems.push({ id: uid(), text: t, pinned: false, progress: 0, due: $('goalDue').value || '' });
+  save('goalItems', goalItems); $('goalInput').value = ''; $('goalDue').value = ''; renderGoals();
+}
+onEnter('goalInput', addGoal);
+
+// ---------- weekly ----------
+function getWeekDates(offset) {
+  const monday = addDays(getMonday(new Date()), offset * 7);
+  return Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+}
 function renderWeekly() {
-  const weekDates = getWeekDates(wkOffset);
-  const wk = dateISO(weekDates[0]);
-  const todayISO = dateISO(new Date());
-  const dayAbbrev = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-
-  const rangeLabel = weekDates[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
-    ' – ' + weekDates[6].toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-  document.getElementById('wkRange').textContent = rangeLabel;
-
+  const dates = getWeekDates(wkOffset);
+  const wk = ymd(dates[0]);
+  const todayISO = todayKey();
+  const abbr = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  $('wkRange').textContent = dates[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' – ' +
+    dates[6].toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  const overall = $('wkOverall');
+  const table = $('wkTable');
   if (!weeklyChecks[wk]) weeklyChecks[wk] = {};
 
-  const overallEl = document.getElementById('wkOverall');
-  const table = document.getElementById('wkTable');
-  if (weeklyTasks.length === 0) {
-    table.innerHTML = '<tr><td style="text-align:left; padding:10px 4px; color:#b3ae9f; font-size:13.5px;">No tasks yet. Add one below to start tracking your week.</td></tr>';
-    overallEl.textContent = '0%';
-    overallEl.className = 'wk-overall low';
-    return;
+  if (!weeklyTasks.length) {
+    table.innerHTML = '<tr><td style="text-align:left;padding:12px 4px;color:var(--muted)">No weekly tasks yet. Add one below to start tracking your week.</td></tr>';
+    overall.textContent = '0%'; overall.className = 'badge';
+  } else {
+    let thead = '<thead><tr><th>Task</th>';
+    dates.forEach((d, i) => { thead += `<th class="${ymd(d) === todayISO ? 'today' : ''}">${abbr[i]}<br>${d.getDate()}</th>`; });
+    thead += '<th>Score</th><th>Goal</th><th>Progress</th><th></th></tr></thead>';
+    let body = '<tbody>', totalScore = 0, totalGoal = 0;
+    weeklyTasks.forEach(task => {
+      if (!weeklyChecks[wk][task.id]) weeklyChecks[wk][task.id] = {};
+      const chk = weeklyChecks[wk][task.id];
+      let score = 0, cells = '';
+      dates.forEach(d => {
+        const iso = ymd(d), on = !!chk[iso]; if (on) score++;
+        cells += `<td class="${iso === todayISO ? 'today' : ''}"><input type="checkbox" ${on ? 'checked' : ''} data-task="${task.id}" data-date="${iso}" aria-label="${abbr[(d.getDay() + 6) % 7]}"></td>`;
+      });
+      const goal = task.goal || 1;
+      const pct = Math.min(100, Math.round(score / goal * 100)), tier = pctTier(pct);
+      totalScore += Math.min(score, goal); totalGoal += goal;
+      body += `<tr><td><div class="wk-task">${escapeHtml(task.text)}</div></td>${cells}
+        <td><span class="score ${tier}">${score}</span></td>
+        <td><input type="number" class="wk-goal-input" min="1" max="7" value="${goal}" inputmode="numeric" data-goal="${task.id}"></td>
+        <td><div class="mini"><div class="bar"><div class="${tier}" style="width:${pct}%"></div></div><span>${pct}%</span></div></td>
+        <td><button class="icon-btn" data-del="${task.id}" aria-label="Delete task">✕</button></td></tr>`;
+    });
+    table.innerHTML = thead + body + '</tbody>';
+    const op = totalGoal ? Math.round(totalScore / totalGoal * 100) : 0;
+    overall.textContent = op + '% complete'; overall.className = 'badge ' + pctTier(op);
+
+    table.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', () => {
+      const t = cb.dataset.task;
+      if (!weeklyChecks[wk][t]) weeklyChecks[wk][t] = {};
+      weeklyChecks[wk][t][cb.dataset.date] = cb.checked;
+      save('weeklyChecks', weeklyChecks); renderWeekly();
+    }));
+    table.querySelectorAll('[data-goal]').forEach(inp => inp.addEventListener('change', () => {
+      const v = parseInt(inp.value, 10);
+      weeklyTasks.find(t => t.id === inp.dataset.goal).goal = (v >= 1 && v <= 7) ? v : 1;
+      save('weeklyTasks', weeklyTasks); renderWeekly();
+    }));
+    table.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+      weeklyTasks = weeklyTasks.filter(t => t.id !== b.dataset.del);
+      save('weeklyTasks', weeklyTasks); renderWeekly();
+    }));
   }
 
-  let thead = '<thead><tr><th style="text-align:left;">Task</th>';
-  weekDates.forEach((d, i) => {
-    const iso = dateISO(d);
-    const isToday = iso === todayISO;
-    thead += `<th class="${isToday ? 'wk-today' : ''}">${dayAbbrev[i]}<br>${d.getDate()}</th>`;
-  });
-  thead += '<th>Score</th><th>Goal</th><th>Progress</th><th></th></tr></thead>';
+  // history (last 6 weeks, relative to the current week)
+  const cur = getMonday(new Date());
+  let hist = '';
+  for (let i = -5; i <= 0; i++) {
+    const m = addDays(cur, i * 7), p = weekPctFor(m), tier = weeklyTasks.length ? pctTier(p) : '';
+    hist += `<div class="hist-col"><div class="hist-val">${weeklyTasks.length ? p + '%' : ''}</div><div class="hist-bar ${tier} ${i === 0 ? 'cur' : ''}" style="height:${Math.max(p, 4)}%"></div><div class="hist-lbl">${fmtShort(ymd(m))}</div></div>`;
+  }
+  $('wkHist').innerHTML = hist;
 
-  let tbody = '<tbody>';
-  let totalScore = 0;
-  let totalGoal = 0;
-  weeklyTasks.forEach(task => {
-    if (!weeklyChecks[wk][task.id]) weeklyChecks[wk][task.id] = {};
-    const taskChecks = weeklyChecks[wk][task.id];
-    let score = 0;
-    let cells = '';
-    weekDates.forEach((d) => {
-      const iso = dateISO(d);
-      const isToday = iso === todayISO;
-      const checked = !!taskChecks[iso];
-      if (checked) score++;
-      cells += `<td class="${isToday ? 'wk-today' : ''}"><input type="checkbox" ${checked ? 'checked' : ''} data-task="${task.id}" data-date="${iso}"></td>`;
-    });
-    const goal = task.goal || 1;
-    const pct = Math.min(100, Math.round((score / goal) * 100));
-    const tier = pctTier(pct);
-    totalScore += Math.min(score, goal);
-    totalGoal += goal;
-    tbody += `<tr>
-      <td class="wk-task-cell">${escapeHtml(task.text)}</td>
-      ${cells}
-      <td><span class="wk-score-badge ${tier}">${score}</span></td>
-      <td><input type="number" class="wk-goal-input" min="1" max="7" value="${goal}" inputmode="numeric" data-goal="${task.id}"></td>
-      <td>
-        <div class="wk-progress-cell">
-          <div class="wk-mini-bar-bg"><div class="wk-mini-bar-fill ${tier}" style="width:${pct}%"></div></div>
-          <span style="font-size:11px; color:#9c9686;">${pct}%</span>
-        </div>
-      </td>
-      <td><button class="wk-del" data-del="${task.id}">✕</button></td>
-    </tr>`;
-  });
-  tbody += '</tbody>';
-  table.innerHTML = thead + tbody;
-
-  const overallPct = totalGoal > 0 ? Math.round((totalScore / totalGoal) * 100) : 0;
-  overallEl.textContent = overallPct + '% complete';
-  overallEl.className = 'wk-overall ' + pctTier(overallPct);
-
-  table.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const taskId = cb.dataset.task;
-      const iso = cb.dataset.date;
-      if (!weeklyChecks[wk][taskId]) weeklyChecks[wk][taskId] = {};
-      weeklyChecks[wk][taskId][iso] = cb.checked;
-      save('weeklyChecks', weeklyChecks);
-      renderWeekly();
-    });
-  });
-  table.querySelectorAll('[data-goal]').forEach(inp => {
-    inp.addEventListener('change', () => {
-      const task = weeklyTasks.find(t => t.id === inp.dataset.goal);
-      const val = parseInt(inp.value, 10);
-      task.goal = (val >= 1 && val <= 7) ? val : 1;
-      save('weeklyTasks', weeklyTasks);
-      renderWeekly();
-    });
-  });
-  table.querySelectorAll('[data-del]').forEach(b => {
-    b.addEventListener('click', () => {
-      weeklyTasks = weeklyTasks.filter(t => t.id !== b.dataset.del);
-      save('weeklyTasks', weeklyTasks);
-      renderWeekly();
-    });
-  });
+  // review note for the displayed week
+  const note = $('wkNote');
+  if (note.dataset.wk !== wk || document.activeElement !== note) note.value = weeklyNotes[wk] || '';
+  note.dataset.wk = wk;
+  renderSummary();
 }
-
 function addWeeklyTask() {
-  const input = document.getElementById('wkTaskInput');
-  const goalInput = document.getElementById('wkGoalInput');
-  const text = input.value.trim();
-  let goal = parseInt(goalInput.value, 10);
-  if (!text) return;
-  if (!(goal >= 1 && goal <= 7)) goal = 5;
-  weeklyTasks.push({ id: uid(), text, goal });
-  save('weeklyTasks', weeklyTasks);
-  input.value = '';
-  goalInput.value = '5';
-  renderWeekly();
+  const t = $('wkTaskInput').value.trim();
+  let g = parseInt($('wkGoalInput').value, 10);
+  if (!t) return;
+  if (!(g >= 1 && g <= 7)) g = 5;
+  weeklyTasks.push({ id: uid(), text: t, goal: g });
+  save('weeklyTasks', weeklyTasks); $('wkTaskInput').value = ''; $('wkGoalInput').value = '5'; renderWeekly();
 }
-document.getElementById('wkTaskInput').addEventListener('keydown', e => { if (e.key === 'Enter') addWeeklyTask(); });
-document.getElementById('wkPrev').addEventListener('click', () => { wkOffset--; renderWeekly(); });
-document.getElementById('wkNext').addEventListener('click', () => { wkOffset++; renderWeekly(); });
-document.getElementById('wkToday').addEventListener('click', () => { wkOffset = 0; renderWeekly(); });
+onEnter('wkTaskInput', addWeeklyTask);
+$('wkPrev').addEventListener('click', () => { wkOffset--; renderWeekly(); });
+$('wkNext').addEventListener('click', () => { wkOffset++; renderWeekly(); });
+$('wkToday').addEventListener('click', () => { wkOffset = 0; renderWeekly(); });
+let noteTimer = null;
+$('wkNote').addEventListener('input', () => {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => {
+    const wk = ymd(getWeekDates(wkOffset)[0]);
+    const v = $('wkNote').value;
+    if (v.trim()) weeklyNotes[wk] = v; else delete weeklyNotes[wk];
+    save('weeklyNotes', weeklyNotes);
+  }, 600);
+});
 
 // ---------- state / sync bridge ----------
-const STATE_KEYS = ['routineItems','routineChecks','goalItems','todoItems','weeklyTasks','weeklyChecks'];
-function getState() {
-  return { routineItems, routineChecks, goalItems, todoItems, weeklyTasks, weeklyChecks };
-}
-function renderAll() { renderRoutine(); renderGoals(); renderTodo(); renderWeekly(); }
+const STATE_KEYS = ['routineItems', 'routineChecks', 'goalItems', 'todoItems', 'weeklyTasks', 'weeklyChecks', 'focusByDate', 'weeklyNotes'];
+function getState() { return { routineItems, routineChecks, goalItems, todoItems, weeklyTasks, weeklyChecks, focusByDate, weeklyNotes }; }
+function renderAll() { renderGreeting(); renderFocus(); renderRoutine(); renderTodo(); renderGoals(); renderWeekly(); }
 function applyState(s) {
   applyingRemote = true;
-  routineItems = Array.isArray(s.routineItems) ? s.routineItems : [];
-  routineChecks = s.routineChecks || {};
-  goalItems = Array.isArray(s.goalItems) ? s.goalItems : [];
-  todoItems = Array.isArray(s.todoItems) ? s.todoItems : [];
-  weeklyTasks = Array.isArray(s.weeklyTasks) ? s.weeklyTasks : [];
-  weeklyChecks = s.weeklyChecks || {};
-  STATE_KEYS.forEach(k => { try { localStorage.setItem(k, JSON.stringify(getState()[k])); } catch(e) {} });
+  const arr = v => Array.isArray(v) ? v : [];
+  routineItems = arr(s.routineItems); routineChecks = s.routineChecks || {};
+  goalItems = arr(s.goalItems); todoItems = arr(s.todoItems);
+  weeklyTasks = arr(s.weeklyTasks); weeklyChecks = s.weeklyChecks || {};
+  focusByDate = s.focusByDate || {}; weeklyNotes = s.weeklyNotes || {};
+  const st = getState();
+  STATE_KEYS.forEach(k => { try { localStorage.setItem(k, JSON.stringify(st[k])); } catch (e) {} });
   applyingRemote = false;
   renderAll();
 }
@@ -569,13 +752,19 @@ function mergeArr(a, b) {
   return [...m.values()];
 }
 function mergeState(a, b) {
+  const focus = {};
+  new Set([...Object.keys(a.focusByDate || {}), ...Object.keys(b.focusByDate || {})]).forEach(k => {
+    focus[k] = mergeArr((a.focusByDate || {})[k], (b.focusByDate || {})[k]);
+  });
   return {
     routineItems: mergeArr(a.routineItems, b.routineItems),
     routineChecks: deepOr(a.routineChecks || {}, b.routineChecks || {}),
     goalItems: mergeArr(a.goalItems, b.goalItems),
     todoItems: mergeArr(a.todoItems, b.todoItems),
     weeklyTasks: mergeArr(a.weeklyTasks, b.weeklyTasks),
-    weeklyChecks: deepOr(a.weeklyChecks || {}, b.weeklyChecks || {})
+    weeklyChecks: deepOr(a.weeklyChecks || {}, b.weeklyChecks || {}),
+    focusByDate: focus,
+    weeklyNotes: Object.assign({}, a.weeklyNotes || {}, b.weeklyNotes || {})
   };
 }
 window.TrackerApp = {
@@ -584,8 +773,7 @@ window.TrackerApp = {
   clearDirty: () => localStorage.removeItem('trackerDirty')
 };
 
-// export / import
-document.getElementById('exportBtn').addEventListener('click', () => {
+$('exportBtn').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify(getState(), null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -593,7 +781,7 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 });
-document.getElementById('importFile').addEventListener('change', e => {
+$('importFile').addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
   const r = new FileReader();
@@ -602,13 +790,17 @@ document.getElementById('importFile').addEventListener('change', e => {
       const data = JSON.parse(r.result);
       if (!data || typeof data !== 'object') throw new Error('bad');
       applyState(mergeState(getState(), data));
-      STATE_KEYS.forEach(k => save(k, getState()[k]));
+      const st = getState();
+      STATE_KEYS.forEach(k => save(k, st[k]));
       alert('Imported.');
     } catch (err) { alert('That file is not a valid Daily Tracker export.'); }
     e.target.value = '';
   };
   r.readAsText(f);
 });
+
+// refresh when the tab becomes visible again (new day, etc.)
+document.addEventListener('visibilitychange', () => { if (!document.hidden) renderAll(); });
 
 renderAll();
 </script>
@@ -637,10 +829,10 @@ let ref = null, unsub = null, pushTimer = null, lastJson = '', email = '';
 
 function renderBar(kind, msg) {
   if (!email) {
-    bar.innerHTML = `<button class="primary" id="signInBtn">Sign in with Google to sync</button><span class="sync-status ${kind || ''}">${msg || 'Saved on this device only'}</span>`;
+    bar.innerHTML = `<span class="sync-status ${kind || ''}">${msg || 'Saved on this device only'}</span><button class="btn primary" id="signInBtn">Sign in to sync</button>`;
     document.getElementById('signInBtn').addEventListener('click', signIn);
   } else {
-    bar.innerHTML = `<span class="sync-status ${kind || ''}">${msg || ''}</span><span>${email}</span><button id="signOutBtn">Sign out</button>`;
+    bar.innerHTML = `<span class="sync-status ${kind || ''}">${msg || ''}</span><span class="who">${escapeHtml(email)}</span><button class="btn" id="signOutBtn">Sign out</button>`;
     document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
   }
 }
@@ -675,8 +867,9 @@ onAuthStateChanged(auth, async (user) => {
   if (unsub) { unsub(); unsub = null; }
   ref = null;
   window.cloudSignedIn = false;
-  if (!user) { email = ''; renderBar('', 'Saved on this device only'); return; }
+  if (!user) { email = ''; window.setUserName(''); renderBar('', 'Saved on this device only'); return; }
   email = user.email || 'Signed in';
+  window.setUserName(user.displayName || '');
   renderBar('', 'Syncing…');
   const r = doc(db, 'users', user.uid, 'data', 'main');
   try {
