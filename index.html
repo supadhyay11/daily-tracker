@@ -188,6 +188,49 @@
   .hist-lbl { font-size: 10.5px; color: var(--muted); }
   textarea { width: 100%; min-height: 92px; resize: vertical; line-height: 1.45; }
 
+
+  /* food & macros */
+  [hidden] { display: none !important; }
+  select { background: var(--input); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 16px; min-width: 0; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .fd-body { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 760px) { .fd-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 24px; } }
+  .fd-left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .fd-right { min-width: 0; }
+  /* On phones, keep the totals, the Add button and today's meals together; targets and trend go below. */
+  @media (max-width: 759px) {
+    .fd-left { display: contents; }
+    .fd-sum { order: 1; } .fd-macros { order: 2; } .fd-right { order: 3; } .fd-tg { order: 4; } .fd-trend { order: 5; }
+  }
+  .fd-cal { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .fd-cal-val { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  .fd-cal-of { color: var(--muted); font-size: 13.5px; }
+  .fd-macros { display: grid; gap: 10px; }
+  .fd-macro-top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; margin-bottom: 4px; }
+  .fd-macro-top span:first-child { font-weight: 600; }
+  .fd-macro-top span:last-child { color: var(--muted); }
+  .fd-macro-top span.fd-over { color: var(--red); }
+  .fd-cal-of .fd-over { color: var(--red); font-weight: 600; }
+  .fd-panel { background: var(--bg); border-radius: 12px; padding: 12px; margin-bottom: 14px; }
+  .fd-tabs { display: flex; width: 100%; margin-top: 10px; }
+  .fd-tabs button { flex: 1; padding: 0 6px; }
+  .fd-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+  .fd-form .full { grid-column: 1 / -1; }
+  .fd-form input[type="text"], .fd-form input[type="number"] { width: 100%; }
+  .fd-form .add-btn { min-height: 44px; }
+  .fd-meal-row { display: flex; align-items: center; gap: 8px; }
+  .fd-meal-row select { flex: 1; }
+  .fd-meal-head { display: flex; justify-content: space-between; font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; margin: 14px 0 2px; }
+  .fd-meal-head:first-child { margin-top: 0; }
+  .fd-kcal { font-weight: 650; font-size: 14px; white-space: nowrap; }
+  .fd-small-btn { background: var(--accent-soft); color: var(--accent); border: none; border-radius: 8px; padding: 0 12px; min-height: 34px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .fd-result { display: flex; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid var(--line); padding: 10px 2px; cursor: pointer; gap: 8px; align-items: center; }
+  .fd-result:last-child { border-bottom: none; }
+  .fd-result .nm { flex: 1; min-width: 0; font-size: 14.5px; word-break: break-word; }
+  .fd-result .sub { display: block; font-size: 12px; color: var(--muted); }
+  .fd-pick { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .fd-flash { font-size: 12.5px; color: var(--green); min-height: 18px; margin-top: 8px; }
+
   .foot { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 12px; }
   .foot label.btn input { display: none; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -279,6 +322,106 @@
           <input type="date" id="todoDue" aria-label="Due date">
           <label class="chip"><input type="checkbox" id="todoPri"> High priority</label>
           <button class="add-btn" style="margin-left:auto" onclick="addTodo()">Add</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOD -->
+    <section class="card span-full" id="foodCard">
+      <div class="wk-head">
+        <div class="wk-left">
+          <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M7 3v8"/><path d="M4 3v5a3 3 0 0 0 6 0V3"/><path d="M7 11v10"/><path d="M17 21V3c-2.5 1.5-4 4.5-4 8h4"/></svg></div>
+          <div class="card-title" style="flex:none">Food &amp; macros</div>
+          <span class="badge" id="fdDateLbl">Today</span>
+        </div>
+        <div class="wk-btns">
+          <button class="btn" id="fdPrev" aria-label="Previous day">◀</button>
+          <button class="btn" id="fdToday">Today</button>
+          <button class="btn" id="fdNext" aria-label="Next day">▶</button>
+        </div>
+      </div>
+      <div class="fd-body">
+        <div class="fd-left">
+          <div class="fd-sum">
+            <div class="fd-cal"><span class="fd-cal-val" id="fdCal">0</span><span class="fd-cal-of" id="fdCalOf">kcal</span></div>
+            <div class="bar" style="margin-top:8px"><div id="fdCalBar" style="width:0%"></div></div>
+          </div>
+          <div class="fd-macros" id="fdMacros"></div>
+          <div class="fd-tg">
+            <button class="link-btn" id="fdTargetsBtn" style="padding-top:0">Set targets</button>
+            <div class="fd-panel" id="fdTargets" hidden style="margin-bottom:0">
+              <div class="fd-form" style="margin-top:0">
+                <div><div class="hint" style="margin:0 0 4px">Calories (kcal)</div><input type="number" id="tgCal" min="0" inputmode="numeric" placeholder="e.g. 2200"></div>
+                <div><div class="hint" style="margin:0 0 4px">Protein (g)</div><input type="number" id="tgP" min="0" inputmode="numeric" placeholder="e.g. 150"></div>
+                <div><div class="hint" style="margin:0 0 4px">Carbs (g)</div><input type="number" id="tgC" min="0" inputmode="numeric" placeholder="e.g. 220"></div>
+                <div><div class="hint" style="margin:0 0 4px">Fat (g)</div><input type="number" id="tgF" min="0" inputmode="numeric" placeholder="e.g. 70"></div>
+              </div>
+              <div class="hint" id="tgHint">Leave a field empty to skip that target.</div>
+              <div class="add-line" style="margin-top:10px">
+                <button class="add-btn" id="tgSave">Save targets</button>
+                <button class="btn" id="tgCancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+          <div class="fd-trend">
+            <div class="sub-title">Last 7 days (calories)</div>
+            <div class="hist" id="fdHist"></div>
+            <div class="hint" id="fdAvg"></div>
+          </div>
+        </div>
+        <div class="fd-right">
+          <button class="add-btn" id="fdAddToggle" style="width:100%;margin-bottom:12px" aria-expanded="false">+ Add food</button>
+          <div class="fd-panel" id="fdPanel" hidden>
+            <div class="fd-meal-row">
+              <label class="chip" for="fdMeal" style="min-height:0">Meal</label>
+              <select id="fdMeal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option></select>
+            </div>
+            <div class="theme-seg fd-tabs" role="group" aria-label="How to add food">
+              <button data-fdtab="manual" class="on">Quick add</button><button data-fdtab="mine">My foods</button><button data-fdtab="search">Search</button>
+            </div>
+
+            <div id="fdTabManual">
+              <div class="fd-form">
+                <input type="text" id="fdName" class="full" placeholder="Food name (e.g. Greek yogurt)" maxlength="80">
+                <input type="number" id="fdCalIn" min="0" inputmode="decimal" placeholder="Calories">
+                <input type="number" id="fdPIn" min="0" inputmode="decimal" placeholder="Protein (g)">
+                <input type="number" id="fdCIn" min="0" inputmode="decimal" placeholder="Carbs (g)">
+                <input type="number" id="fdFIn" min="0" inputmode="decimal" placeholder="Fat (g)">
+                <label class="chip full"><input type="checkbox" id="fdSaveFood"> Save to My foods</label>
+                <button class="add-btn full" id="fdAddManual">Add to log</button>
+              </div>
+              <div class="hint">Leave calories blank to work them out from the macros.</div>
+            </div>
+
+            <div id="fdTabMine" hidden>
+              <div class="add-line" style="margin-top:10px">
+                <label class="chip" for="fdServ" style="min-height:0">Servings</label>
+                <input type="number" id="fdServ" value="1" min="0.25" step="0.25" inputmode="decimal" style="width:84px;text-align:center">
+              </div>
+              <div id="fdMineList"></div>
+            </div>
+
+            <div id="fdTabSearch" hidden>
+              <div class="add" style="margin-top:10px">
+                <input type="text" id="fdQ" placeholder="Search foods (e.g. oats, yogurt)" enterkeyhint="search" maxlength="80">
+                <button class="add-btn" id="fdSearchBtn">Search</button>
+              </div>
+              <div class="hint" id="fdSearchMsg">Searches the Open Food Facts database, mostly packaged foods. Values are per 100 g.</div>
+              <div id="fdResults"></div>
+              <div class="fd-pick" id="fdPick" hidden>
+                <div class="label" id="fdPickName" style="font-weight:600"></div>
+                <div class="add-line" style="margin-top:8px">
+                  <label class="chip" for="fdGrams" style="min-height:0">Amount (g)</label>
+                  <input type="number" id="fdGrams" value="100" min="1" inputmode="decimal" style="width:96px;text-align:center">
+                </div>
+                <div class="hint" id="fdPickPrev"></div>
+                <label class="chip"><input type="checkbox" id="fdSavePick"> Save to My foods (per 100 g)</label>
+                <button class="add-btn" id="fdAddPick" style="width:100%">Add to log</button>
+              </div>
+            </div>
+            <div class="fd-flash" id="fdFlash" role="status"></div>
+          </div>
+          <div id="fdMeals"></div>
         </div>
       </div>
     </section>
@@ -378,6 +521,10 @@ let weeklyTasks = load('weeklyTasks', []);
 let weeklyChecks = load('weeklyChecks', {});
 let focusByDate = load('focusByDate', {});
 let weeklyNotes = load('weeklyNotes', {});
+let foodLog = load('foodLog', {});        // { 'YYYY-MM-DD': [ {id, meal, name, cal, p, c, f} ] }
+let foodDaily = load('foodDaily', {});    // totals for days older than 90 days
+let foodFoods = load('foodFoods', []);    // saved foods (My foods)
+let foodTargets = load('foodTargets', {}); // { cal, p, c, f }
 let wkOffset = 0;
 let showDone = false;
 let userName = '';
@@ -741,10 +888,269 @@ $('wkNote').addEventListener('input', () => {
   }, 600);
 });
 
+// ---------- food & macros ----------
+const MEALS = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+const FOOD_KEEP_DAYS = 90;
+let foodOffset = 0;
+let fdPicked = null;
+const fdNum = v => { const n = parseFloat(v); return isFinite(n) && n > 0 ? Math.min(n, 99999) : 0; };
+const r1 = n => Math.round(n * 10) / 10;
+const foodDate = () => ymd(addDays(new Date(), foodOffset));
+const kcalFrom = (p, c, f) => Math.round(p * 4 + c * 4 + f * 9);
+function sumEntries(list) { return list.reduce((a, e) => ({ cal: a.cal + (e.cal || 0), p: a.p + (e.p || 0), c: a.c + (e.c || 0), f: a.f + (e.f || 0) }), { cal: 0, p: 0, c: 0, f: 0 }); }
+function dayTotals(d) { return foodLog[d] ? sumEntries(foodLog[d]) : (foodDaily[d] || { cal: 0, p: 0, c: 0, f: 0 }); }
+// Entries older than FOOD_KEEP_DAYS are folded into daily totals so the synced data stays small.
+function compactFood() {
+  const cutoff = ymd(addDays(new Date(), -FOOD_KEEP_DAYS));
+  let changed = false;
+  Object.keys(foodLog).forEach(d => {
+    if (d < cutoff) {
+      const t = sumEntries(foodLog[d] || []);
+      if (!foodDaily[d]) foodDaily[d] = { cal: Math.round(t.cal), p: Math.round(t.p), c: Math.round(t.c), f: Math.round(t.f) };
+      delete foodLog[d]; changed = true;
+    }
+  });
+  if (changed) { save('foodLog', foodLog); save('foodDaily', foodDaily); }
+}
+let fdFlashTimer = null;
+function fdFlash(msg) {
+  const el = $('fdFlash'); el.textContent = msg;
+  clearTimeout(fdFlashTimer); fdFlashTimer = setTimeout(() => { el.textContent = ''; }, 2500);
+}
+
+function renderFood() {
+  compactFood();
+  const d = foodDate();
+  const list = foodLog[d] || [];
+  const t = sumEntries(list);
+  const tg = foodTargets || {};
+
+  $('fdDateLbl').textContent = foodOffset === 0 ? 'Today' : foodOffset === -1 ? 'Yesterday' : fmtShort(d);
+  $('fdNext').disabled = foodOffset >= 0;
+  $('fdPrev').disabled = foodOffset <= -(FOOD_KEEP_DAYS - 1);
+
+  // calories
+  const tc = tg.cal || 0;
+  $('fdCal').textContent = Math.round(t.cal).toLocaleString();
+  if (tc) {
+    const left = Math.round(tc - t.cal);
+    $('fdCalOf').innerHTML = 'of ' + tc.toLocaleString() + ' kcal · ' + (left >= 0 ? left.toLocaleString() + ' left' : '<span class="fd-over">' + (-left).toLocaleString() + ' over</span>');
+  } else $('fdCalOf').textContent = 'kcal · set a target below';
+  const calBar = $('fdCalBar');
+  calBar.style.width = (tc ? Math.min(100, t.cal / tc * 100) : 0) + '%';
+  calBar.className = tc && t.cal > tc ? 'low' : '';
+
+  // macros (protein is a minimum, so reaching it is green; carbs and fat turn red when over)
+  $('fdMacros').innerHTML = [['Protein', 'p'], ['Carbs', 'c'], ['Fat', 'f']].map(([n, k]) => {
+    const g = tg[k] || 0, v = t[k];
+    const pct = g ? Math.min(100, v / g * 100) : 0;
+    const over = !!g && k !== 'p' && v > g;
+    const cls = over ? 'low' : (g && k === 'p' && v >= g ? 'high' : '');
+    return '<div><div class="fd-macro-top"><span>' + n + '</span><span class="' + (over ? 'fd-over' : '') + '">' + Math.round(v) + ' g' + (g ? ' / ' + g + ' g' : '') + '</span></div><div class="bar"><div class="' + cls + '" style="width:' + pct + '%"></div></div></div>';
+  }).join('');
+  $('fdTargetsBtn').textContent = (tg.cal || tg.p || tg.c || tg.f) ? 'Edit targets' : 'Set targets';
+
+  // meals
+  const box = $('fdMeals');
+  box.innerHTML = list.length ? '' : '<div class="empty">Nothing logged for this day yet.</div>';
+  MEALS.forEach(m => {
+    const items = list.filter(e => (MEALS.includes(e.meal) ? e.meal : 'Snacks') === m);
+    if (!items.length) return;
+    const head = document.createElement('div');
+    head.className = 'fd-meal-head';
+    head.innerHTML = '<span>' + m + '</span><span>' + Math.round(sumEntries(items).cal) + ' kcal</span>';
+    box.appendChild(head);
+    items.forEach(e => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = '<div class="row-body"><div class="label">' + escapeHtml(e.name) + '</div><div class="meta"><span class="tag">P ' + Math.round(e.p) + 'g</span><span class="tag">C ' + Math.round(e.c) + 'g</span><span class="tag">F ' + Math.round(e.f) + 'g</span></div></div><span class="fd-kcal">' + Math.round(e.cal) + '</span><button class="icon-btn" data-fdel="' + e.id + '" aria-label="Delete ' + escapeHtml(e.name) + '">✕</button>';
+      box.appendChild(row);
+    });
+  });
+  box.querySelectorAll('[data-fdel]').forEach(b => b.addEventListener('click', () => {
+    foodLog[d] = (foodLog[d] || []).filter(x => x.id !== b.dataset.fdel);
+    if (!foodLog[d].length) delete foodLog[d];
+    save('foodLog', foodLog); renderFood();
+  }));
+
+  // last 7 days
+  const days = []; for (let i = 6; i >= 0; i--) days.push(ymd(addDays(new Date(), -i)));
+  const vals = days.map(x => Math.round(dayTotals(x).cal));
+  const max = Math.max(1, tc, ...vals);
+  $('fdHist').innerHTML = days.map((x, i) => {
+    const h = vals[i] ? Math.max(4, Math.round(vals[i] / max * 60)) : 4;
+    return '<div class="hist-col"><div class="hist-val">' + (vals[i] || '') + '</div><div class="hist-bar ' + (x === d ? 'cur' : '') + '" style="height:' + h + 'px;' + (vals[i] ? '' : 'opacity:.25') + '"></div><div class="hist-lbl">' + parseYMD(x).toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 3) + '</div></div>';
+  }).join('');
+  const logged = vals.filter(v => v > 0);
+  $('fdAvg').textContent = logged.length ? 'Average ' + Math.round(logged.reduce((a, b) => a + b, 0) / logged.length).toLocaleString() + ' kcal on the ' + logged.length + ' day' + (logged.length === 1 ? '' : 's') + ' you logged.' : 'Nothing logged in the last 7 days.';
+
+  renderMine();
+}
+
+function addEntry(e) {
+  const d = foodDate();
+  const list = foodLog[d] || [];
+  list.push(Object.assign({ id: uid(), meal: $('fdMeal').value }, e));
+  foodLog[d] = list;
+  save('foodLog', foodLog);
+  renderFood();
+  fdFlash('Added ' + e.name + ' to ' + $('fdMeal').value.toLowerCase() + ' ✓');
+}
+
+// ---- my foods ----
+function renderMine() {
+  const box = $('fdMineList');
+  const foods = foodFoods.slice().sort((a, b) => a.name.localeCompare(b.name));
+  box.innerHTML = foods.length ? '' : '<div class="empty">No saved foods yet. Tick “Save to My foods” when you add one.</div>';
+  foods.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = '<div class="row-body"><div class="label">' + escapeHtml(f.name) + '</div><div class="meta"><span class="tag">' + escapeHtml(f.serving || '1 serving') + '</span><span class="tag">' + Math.round(f.cal) + ' kcal</span><span class="tag">P ' + Math.round(f.p) + '</span><span class="tag">C ' + Math.round(f.c) + '</span><span class="tag">F ' + Math.round(f.f) + '</span></div></div><button class="fd-small-btn" data-fadd="' + f.id + '">Add</button><button class="icon-btn" data-fgone="' + f.id + '" aria-label="Remove ' + escapeHtml(f.name) + ' from My foods">✕</button>';
+    box.appendChild(row);
+  });
+  box.querySelectorAll('[data-fadd]').forEach(b => b.addEventListener('click', () => {
+    const f = foodFoods.find(x => x.id === b.dataset.fadd); if (!f) return;
+    const s = fdNum($('fdServ').value) || 1;
+    addEntry({ name: s === 1 ? f.name : f.name + ' ×' + s, cal: Math.round(f.cal * s), p: r1(f.p * s), c: r1(f.c * s), f: r1(f.f * s) });
+  }));
+  box.querySelectorAll('[data-fgone]').forEach(b => b.addEventListener('click', () => {
+    foodFoods = foodFoods.filter(x => x.id !== b.dataset.fgone);
+    save('foodFoods', foodFoods); renderMine();
+  }));
+}
+
+// ---- quick add ----
+$('fdAddManual').addEventListener('click', () => {
+  const p = fdNum($('fdPIn').value), c = fdNum($('fdCIn').value), f = fdNum($('fdFIn').value);
+  let cal = fdNum($('fdCalIn').value);
+  if (!cal && (p || c || f)) cal = kcalFrom(p, c, f);
+  if (!cal) { fdFlash('Enter calories or at least one macro.'); return; }
+  const name = $('fdName').value.trim() || 'Food';
+  const vals = { cal: Math.round(cal), p: r1(p), c: r1(c), f: r1(f) };
+  if ($('fdSaveFood').checked) {
+    foodFoods.push(Object.assign({ id: uid(), name, serving: '1 serving' }, vals));
+    save('foodFoods', foodFoods);
+  }
+  addEntry(Object.assign({ name }, vals));
+  ['fdName', 'fdCalIn', 'fdPIn', 'fdCIn', 'fdFIn'].forEach(id => { $(id).value = ''; });
+  $('fdSaveFood').checked = false;
+});
+['fdName', 'fdCalIn', 'fdPIn', 'fdCIn', 'fdFIn'].forEach(id => onEnter(id, () => $('fdAddManual').click()));
+
+// ---- search (Open Food Facts) ----
+function parseOFF(p) {
+  const n = p.nutriments || {};
+  const name = (p.product_name || '').trim();
+  if (!name) return null;
+  let kcal = n['energy-kcal_100g'];
+  if (kcal == null && n['energy_100g'] != null) kcal = n['energy_100g'] / 4.184;
+  kcal = Number(kcal);
+  if (!isFinite(kcal)) return null;
+  return {
+    name, brand: (p.brands || '').split(',')[0].trim(),
+    cal: Math.round(kcal), p: r1(Number(n.proteins_100g) || 0), c: r1(Number(n.carbohydrates_100g) || 0), f: r1(Number(n.fat_100g) || 0),
+    serving: Number(p.serving_quantity) || 0
+  };
+}
+let fdResults = [];
+async function foodSearch() {
+  const q = $('fdQ').value.trim();
+  if (!q) return;
+  const msg = $('fdSearchMsg');
+  msg.textContent = 'Searching…';
+  $('fdResults').innerHTML = ''; $('fdPick').hidden = true; fdPicked = null;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 12000);
+  try {
+    const url = 'https://world.openfoodfacts.org/cgi/search.pl?search_simple=1&action=process&json=1&page_size=20&fields=product_name,brands,nutriments,serving_quantity&search_terms=' + encodeURIComponent(q);
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) throw new Error('http ' + res.status);
+    const data = await res.json();
+    fdResults = (data.products || []).map(parseOFF).filter(Boolean).slice(0, 10);
+    if (!fdResults.length) { msg.textContent = 'No matches. Try a simpler word, or use Quick add.'; return; }
+    msg.textContent = 'Tap a food. Values are per 100 g.';
+    $('fdResults').innerHTML = fdResults.map((r, i) => '<button class="fd-result" data-pick="' + i + '"><span class="nm">' + escapeHtml(r.name) + '<span class="sub">' + (r.brand ? escapeHtml(r.brand) + ' · ' : '') + 'P ' + r.p + ' · C ' + r.c + ' · F ' + r.f + '</span></span><span class="fd-kcal">' + r.cal + ' kcal</span></button>').join('');
+    $('fdResults').querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => pickFood(fdResults[+b.dataset.pick])));
+  } catch (e) {
+    msg.textContent = 'Search is not available right now. You can still use Quick add or My foods.';
+  } finally { clearTimeout(timer); }
+}
+function pickPreview() {
+  if (!fdPicked) return;
+  const g = fdNum($('fdGrams').value), k = g / 100;
+  $('fdPickPrev').textContent = g ? Math.round(fdPicked.cal * k) + ' kcal · P ' + r1(fdPicked.p * k) + ' · C ' + r1(fdPicked.c * k) + ' · F ' + r1(fdPicked.f * k) : 'Enter an amount in grams.';
+}
+function pickFood(r) {
+  fdPicked = r;
+  $('fdPickName').textContent = r.name + (r.brand ? ' (' + r.brand + ')' : '');
+  $('fdGrams').value = r.serving >= 1 && r.serving <= 2000 ? Math.round(r.serving) : 100;
+  $('fdSavePick').checked = false;
+  $('fdPick').hidden = false;
+  pickPreview();
+  $('fdPick').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+$('fdSearchBtn').addEventListener('click', foodSearch);
+onEnter('fdQ', foodSearch);
+$('fdGrams').addEventListener('input', pickPreview);
+$('fdAddPick').addEventListener('click', () => {
+  if (!fdPicked) return;
+  const g = fdNum($('fdGrams').value);
+  if (!g) { fdFlash('Enter an amount in grams.'); return; }
+  const k = g / 100;
+  if ($('fdSavePick').checked) {
+    foodFoods.push({ id: uid(), name: fdPicked.name, serving: '100 g', cal: fdPicked.cal, p: fdPicked.p, c: fdPicked.c, f: fdPicked.f });
+    save('foodFoods', foodFoods);
+  }
+  addEntry({ name: fdPicked.name + ' (' + Math.round(g) + ' g)', cal: Math.round(fdPicked.cal * k), p: r1(fdPicked.p * k), c: r1(fdPicked.c * k), f: r1(fdPicked.f * k) });
+});
+
+// ---- targets ----
+function targetsHint() {
+  const p = fdNum($('tgP').value), c = fdNum($('tgC').value), f = fdNum($('tgF').value);
+  $('tgHint').textContent = (p || c || f) ? 'Protein, carbs and fat add up to ' + kcalFrom(p, c, f).toLocaleString() + ' kcal.' : 'Leave a field empty to skip that target.';
+}
+['tgP', 'tgC', 'tgF'].forEach(id => $(id).addEventListener('input', targetsHint));
+$('fdTargetsBtn').addEventListener('click', () => {
+  const box = $('fdTargets');
+  if (box.hidden) {
+    const tg = foodTargets || {};
+    $('tgCal').value = tg.cal || ''; $('tgP').value = tg.p || ''; $('tgC').value = tg.c || ''; $('tgF').value = tg.f || '';
+    targetsHint();
+  }
+  box.hidden = !box.hidden;
+});
+$('tgCancel').addEventListener('click', () => { $('fdTargets').hidden = true; });
+$('tgSave').addEventListener('click', () => {
+  const t = {};
+  [['cal', 'tgCal'], ['p', 'tgP'], ['c', 'tgC'], ['f', 'tgF']].forEach(([k, id]) => { const n = Math.round(fdNum($(id).value)); if (n) t[k] = n; });
+  foodTargets = t;
+  save('foodTargets', foodTargets);
+  $('fdTargets').hidden = true;
+  renderFood();
+});
+
+// ---- panel, tabs, date ----
+function fdSetTab(tab) {
+  document.querySelectorAll('[data-fdtab]').forEach(b => b.classList.toggle('on', b.dataset.fdtab === tab));
+  $('fdTabManual').hidden = tab !== 'manual';
+  $('fdTabMine').hidden = tab !== 'mine';
+  $('fdTabSearch').hidden = tab !== 'search';
+}
+document.querySelectorAll('[data-fdtab]').forEach(b => b.addEventListener('click', () => fdSetTab(b.dataset.fdtab)));
+$('fdAddToggle').addEventListener('click', () => {
+  const p = $('fdPanel'); p.hidden = !p.hidden;
+  $('fdAddToggle').textContent = p.hidden ? '+ Add food' : 'Close';
+  $('fdAddToggle').setAttribute('aria-expanded', String(!p.hidden));
+});
+$('fdPrev').addEventListener('click', () => { if (foodOffset > -(FOOD_KEEP_DAYS - 1)) { foodOffset--; renderFood(); } });
+$('fdNext').addEventListener('click', () => { if (foodOffset < 0) { foodOffset++; renderFood(); } });
+$('fdToday').addEventListener('click', () => { foodOffset = 0; renderFood(); });
+(function () { const h = new Date().getHours(); $('fdMeal').value = h < 10 ? 'Breakfast' : h < 15 ? 'Lunch' : h < 20 ? 'Dinner' : 'Snacks'; })();
+
 // ---------- state / sync bridge ----------
-const STATE_KEYS = ['routineItems', 'routineChecks', 'goalItems', 'todoItems', 'weeklyTasks', 'weeklyChecks', 'focusByDate', 'weeklyNotes'];
-function getState() { return { routineItems, routineChecks, goalItems, todoItems, weeklyTasks, weeklyChecks, focusByDate, weeklyNotes }; }
-function renderAll() { renderGreeting(); renderFocus(); renderRoutine(); renderTodo(); renderGoals(); renderWeekly(); }
+const STATE_KEYS = ['routineItems', 'routineChecks', 'goalItems', 'todoItems', 'weeklyTasks', 'weeklyChecks', 'focusByDate', 'weeklyNotes', 'foodLog', 'foodDaily', 'foodFoods', 'foodTargets'];
+function getState() { return { routineItems, routineChecks, goalItems, todoItems, weeklyTasks, weeklyChecks, focusByDate, weeklyNotes, foodLog, foodDaily, foodFoods, foodTargets }; }
+function renderAll() { renderGreeting(); renderFocus(); renderRoutine(); renderTodo(); renderFood(); renderGoals(); renderWeekly(); }
 function applyState(s) {
   applyingRemote = true;
   const arr = v => Array.isArray(v) ? v : [];
@@ -752,6 +1158,12 @@ function applyState(s) {
   goalItems = arr(s.goalItems); todoItems = arr(s.todoItems);
   weeklyTasks = arr(s.weeklyTasks); weeklyChecks = s.weeklyChecks || {};
   focusByDate = s.focusByDate || {}; weeklyNotes = s.weeklyNotes || {};
+  // Food keys are optional: an older copy of the page may save without them, so keep local values in that case.
+  const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
+  if (s.foodLog !== undefined) foodLog = obj(s.foodLog);
+  if (s.foodDaily !== undefined) foodDaily = obj(s.foodDaily);
+  if (s.foodFoods !== undefined) foodFoods = arr(s.foodFoods);
+  if (s.foodTargets !== undefined) foodTargets = obj(s.foodTargets);
   const st = getState();
   STATE_KEYS.forEach(k => { try { localStorage.setItem(k, JSON.stringify(st[k])); } catch (e) {} });
   applyingRemote = false;
@@ -772,6 +1184,12 @@ function mergeArr(a, b) {
   [...(b || []), ...(a || [])].forEach(x => { if (x && !m.has(x.id)) m.set(x.id, x); });
   return [...m.values()];
 }
+function mergeFoodLog(a, b) {
+  a = a || {}; b = b || {};
+  const out = {};
+  new Set([...Object.keys(a), ...Object.keys(b)]).forEach(k => { out[k] = mergeArr(a[k], b[k]); });
+  return out;
+}
 function mergeState(a, b) {
   const focus = {};
   new Set([...Object.keys(a.focusByDate || {}), ...Object.keys(b.focusByDate || {})]).forEach(k => {
@@ -785,7 +1203,11 @@ function mergeState(a, b) {
     weeklyTasks: mergeArr(a.weeklyTasks, b.weeklyTasks),
     weeklyChecks: deepOr(a.weeklyChecks || {}, b.weeklyChecks || {}),
     focusByDate: focus,
-    weeklyNotes: Object.assign({}, a.weeklyNotes || {}, b.weeklyNotes || {})
+    weeklyNotes: Object.assign({}, a.weeklyNotes || {}, b.weeklyNotes || {}),
+    foodLog: mergeFoodLog(a.foodLog, b.foodLog),
+    foodDaily: deepOr(a.foodDaily || {}, b.foodDaily || {}),
+    foodFoods: mergeArr(a.foodFoods, b.foodFoods),
+    foodTargets: Object.assign({}, a.foodTargets || {}, b.foodTargets || {})
   };
 }
 window.TrackerApp = {
