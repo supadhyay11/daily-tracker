@@ -7,8 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Antly">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#f3fbf3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f1511" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f8f4fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#140f19" media="(prefers-color-scheme: dark)">
 <title>Antly</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -20,37 +20,37 @@
 <script>
   // apply saved theme before first paint (no flash)
   // show icons only once the icon font is ready, so a slow or offline load never shows raw icon names
-  try { document.fonts.load('24px "Material Symbols Outlined"', 'check').then(function () { document.documentElement.classList.add('icons'); }, function () {}); } catch (e) {}
+  try { document.fonts.load('24px "Material Symbols Outlined"', 'check').then(function (f) { if (f && f.length) document.documentElement.classList.add('icons'); }, function () {}); } catch (e) {}
   try { var t = localStorage.getItem('trackerTheme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
 </script>
 <style>
-/* Antly. Warm minimalist: single phone-width column, tonal layers, sage for completion, terracotta for priority, olive for nutrition. */
+/* Antly. Warm minimalist, plum palette: single phone-width column, tonal layers, plum for completion, coral for priority, gold for nutrition. */
 :root{
   color-scheme:light;
-  --bg:#f3fbf3; --card:#ffffff; --wash:#eef6ee; --wash2:#e8f0e8; --line:#e2eae2;
-  --fg:#161d19; --fg2:#414942; --fg3:#717971;
-  --sage:#316342; --sage-c:#4a7c59; --sage-t:rgba(74,124,89,.14);
-  --terra:#99462a; --terra-c:#d97757; --terra-t:rgba(217,119,87,.16);
-  --olive:#5a5b27; --olive-c:#8b8c52; --olive-t:rgba(139,140,82,.18);
-  --track:#e2eae2; --shadow:0 4px 20px rgba(31,36,33,.06); --scrim:rgba(22,29,25,.42);
+  --bg:#f8f4fb; --card:#ffffff; --wash:#f1eaf6; --wash2:#eadff2; --line:#e6dcee;
+  --fg:#21182a; --fg2:#54445f; --fg3:#82738d;
+  --sage:#5d3a82; --sage-c:#7a4fa0; --on-sage:#ffffff; --sage-t:rgba(122,79,160,.14);
+  --terra:#a03e2d; --terra-c:#e07b6a; --terra-t:rgba(224,123,106,.17);
+  --olive:#7d5e0f; --olive-c:#c49a3a; --olive-t:rgba(196,154,58,.2);
+  --track:#e6dcee; --shadow:0 4px 20px rgba(33,24,42,.07); --scrim:rgba(33,24,42,.42);
   --font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   color-scheme:dark;
-  --bg:#0f1511; --card:#18211b; --wash:#1d2820; --wash2:#243128; --line:#2a372d;
-  --fg:#e6eee7; --fg2:#bcc7be; --fg3:#8a968d;
-  --sage:#9dd3aa; --sage-c:#4a7c59; --sage-t:rgba(157,211,170,.16);
-  --terra:#ffb59e; --terra-c:#d97757; --terra-t:rgba(255,181,158,.16);
-  --olive:#caca8a; --olive-c:#8b8c52; --olive-t:rgba(202,202,138,.16);
-  --track:#2a372d; --shadow:0 4px 20px rgba(0,0,0,.35); --scrim:rgba(0,0,0,.6)}}
+  --bg:#140f19; --card:#1d1724; --wash:#251d2e; --wash2:#2d2338; --line:#33283f;
+  --fg:#efe7f6; --fg2:#c6b8d3; --fg3:#9686a4;
+  --sage:#cfa9ee; --sage-c:#7a4fa0; --sage-t:rgba(207,169,238,.16);
+  --terra:#f5ada1; --terra-c:#e07b6a; --terra-t:rgba(245,173,161,.16);
+  --olive:#ebcb78; --olive-c:#c49a3a; --olive-t:rgba(235,203,120,.16);
+  --track:#33283f; --shadow:0 4px 20px rgba(0,0,0,.35); --scrim:rgba(0,0,0,.6)}}
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#0f1511; --card:#18211b; --wash:#1d2820; --wash2:#243128; --line:#2a372d;
-  --fg:#e6eee7; --fg2:#bcc7be; --fg3:#8a968d;
-  --sage:#9dd3aa; --sage-c:#4a7c59; --sage-t:rgba(157,211,170,.16);
-  --terra:#ffb59e; --terra-c:#d97757; --terra-t:rgba(255,181,158,.16);
-  --olive:#caca8a; --olive-c:#8b8c52; --olive-t:rgba(202,202,138,.16);
-  --track:#2a372d; --shadow:0 4px 20px rgba(0,0,0,.35); --scrim:rgba(0,0,0,.6)}
+  --bg:#140f19; --card:#1d1724; --wash:#251d2e; --wash2:#2d2338; --line:#33283f;
+  --fg:#efe7f6; --fg2:#c6b8d3; --fg3:#9686a4;
+  --sage:#cfa9ee; --sage-c:#7a4fa0; --sage-t:rgba(207,169,238,.16);
+  --terra:#f5ada1; --terra-c:#e07b6a; --terra-t:rgba(245,173,161,.16);
+  --olive:#ebcb78; --olive-c:#c49a3a; --olive-t:rgba(235,203,120,.16);
+  --track:#33283f; --shadow:0 4px 20px rgba(0,0,0,.35); --scrim:rgba(0,0,0,.6)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
@@ -176,7 +176,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .filters::-webkit-scrollbar{display:none}
 .fchip{flex:none;height:36px;padding:0 18px;border-radius:999px;background:var(--wash2);color:var(--fg2);font-weight:500}
 .fchip[aria-pressed="true"]{background:var(--sage-c);color:#fff}
-.streak{background:linear-gradient(135deg,#2c5a3b,#4a7c59);color:#fff;border-radius:24px;padding:20px;display:flex;align-items:center;gap:16px}
+.streak{background:linear-gradient(135deg,#5d3a82,#7a4fa0);color:#fff;border-radius:24px;padding:20px;display:flex;align-items:center;gap:16px}
 .streak .lf{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:none}
 .streak .t{flex:1;min-width:0}
 .streak .t span{display:block;font-size:13px;opacity:.85}
@@ -251,7 +251,7 @@ select.sel{height:36px;border-radius:999px;background:var(--wash2);border:0;padd
 .res .nm small{display:block;font-weight:400;color:var(--fg2);font-size:12.5px}
 .grid2{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-video.cam{width:100%;border-radius:20px;background:#1d2820;aspect-ratio:4/3;object-fit:cover}
+video.cam{width:100%;border-radius:20px;background:var(--wash2);aspect-ratio:4/3;object-fit:cover}
 .toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:500;z-index:50;transition:all .25s;max-width:calc(100% - 32px);text-align:center;display:flex;gap:12px;align-items:center}
 .toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast button{font-weight:700;color:var(--sage-c);filter:brightness(1.4)}
@@ -400,7 +400,7 @@ function save(key){
   if(window.cloudPush)window.cloudPush();
 }
 var UI={tab:'today',selDate:todayKey(),tasksWk:0,goalsWk:0,gfilter:'all',showDone:false,foodOff:0,foodOpen:false,userName:'',
-  sync:{kind:'off',msg:'Saved on this device only',email:''},
+  sync:{kind:'off',msg:'Saved on this device only.',email:''},
   fd:{tab:'search',q:'',results:[],msg:'',picked:null,code:'',scanning:false}};
 function waterGoal(){var g=parseInt((D.settings||{}).waterGoal,10);return g>0?g:8}
 
