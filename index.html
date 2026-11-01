@@ -159,7 +159,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .row.done .tx>span:first-child{text-decoration:line-through;color:var(--fg2)}
 .tags{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center}
 .time{display:inline-flex;align-items:center;gap:4px;color:var(--fg3);font-size:13px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 20px;border-radius:14px;background:var(--sage-c);color:#fff;font-weight:600;font-size:14px}
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 20px;border-radius:14px;background:var(--sage-c);color:#fff;font-weight:600;font-size:14px}
 .btn:active{filter:brightness(.9)}
 .btn.sm{height:40px;padding:0 16px;border-radius:12px}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
@@ -750,10 +750,10 @@ function rFood(){
     b+='<div class="list">'+fd.results.map(function(r,i){return '<button class="res" data-act="fd-pick" data-i="'+i+'"><span class="nm">'+esc(r.name)+'<small>'+(r.brand?esc(r.brand)+' · ':'')+'P '+r.p+' · C '+r.c+' · F '+r.f+'</small></span><b class="num">'+r.cal+' kcal</b></button>'}).join('')+'</div>'+pickPanel();
   }
   if(tab==='scan'){
-    var can='BarcodeDetector' in window&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia;
+    var can=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
     if(can){b+=fd.scanning?'<video class="cam" id="scanVid" playsinline muted></video><p class="muted">Point the camera at a barcode.</p><button class="btn ghost" data-act="fd-stopscan">Stop camera</button>':'<button class="btn" data-act="fd-startscan">'+ic('photo_camera','s20')+'Start camera</button>'}
     b+='<form id="fdCodeForm" style="display:flex;gap:8px"><input class="field" id="fdCode" inputmode="numeric" placeholder="Or type the barcode number" aria-label="Barcode number" value="'+esc(fd.code)+'"><button class="btn" type="submit" style="height:46px">Look up</button></form>';
-    b+='<p class="muted" id="fdMsg">'+esc(fd.msg||(can?'':'Camera scanning is not supported in this browser. Type the number under the barcode instead.'))+'</p>'+pickPanel();
+    b+='<p class="muted" id="fdMsg">'+esc(fd.msg||(can?'':'The camera needs a secure (https) page and camera permission. Type the number under the barcode instead.'))+'</p>'+pickPanel();
   }
   if(tab==='mine'){
     var foods=D.foodFoods.slice().sort(function(a,b){return a.name.localeCompare(b.name)});
@@ -791,14 +791,44 @@ function lookupBarcode(code){
     .catch(function(){UI.fd.msg='Lookup is not available right now.';rFood()});
 }
 var scanStream=null,scanTimer=null;
+function loadZX(){
+  return new Promise(function(res,rej){
+    if(window.ZXing)return res();
+    var sc=document.createElement('script');
+    sc.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+    sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);
+  });
+}
 function attachScan(){
   var v=$('#scanVid');if(!v)return;
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(s){
+  v.setAttribute('playsinline','');v.muted=true;
+  var found=function(code){if(!scanTimer)return;stopScan();rFood();lookupBarcode(code)};
+  var fail=function(){stopScan();UI.fd.msg='Camera is not available. Allow camera access in your browser, or type the barcode number instead.';rFood()};
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}}).then(function(s){
     scanStream=s;v.srcObject=s;return v.play();
   }).then(function(){
-    var det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
-    scanTimer=setInterval(function(){det.detect(v).then(function(r){if(r.length){var c=r[0].rawValue;stopScan();rFood();lookupBarcode(c)}}).catch(function(){})},400);
-  }).catch(function(){stopScan();UI.fd.msg='Camera is not available. Type the barcode number instead.';rFood()});
+    if('BarcodeDetector' in window){
+      // Built-in detector (Chrome on Android, desktop Chrome).
+      var det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
+      scanTimer=setInterval(function(){det.detect(v).then(function(r){if(r.length)found(r[0].rawValue)}).catch(function(){})},300);
+      return;
+    }
+    // Everything else (iPhone Safari, Firefox): decode camera frames with ZXing, loaded only when needed.
+    fdSetMsg('Starting scanner\u2026');
+    return loadZX().then(function(){
+      var Z=window.ZXing,hints=new Map(),rd=new Z.MultiFormatReader();
+      hints.set(Z.DecodeHintType.POSSIBLE_FORMATS,[Z.BarcodeFormat.EAN_13,Z.BarcodeFormat.EAN_8,Z.BarcodeFormat.UPC_A,Z.BarcodeFormat.UPC_E]);
+      hints.set(Z.DecodeHintType.TRY_HARDER,true);rd.setHints(hints);
+      var cv=document.createElement('canvas'),cx=cv.getContext('2d');
+      scanTimer=setInterval(function(){
+        if(!v.videoWidth)return;
+        var sc=Math.min(1,900/v.videoWidth);cv.width=Math.round(v.videoWidth*sc);cv.height=Math.round(v.videoHeight*sc);
+        cx.drawImage(v,0,0,cv.width,cv.height);
+        try{found(rd.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(cv)))).getText())}catch(e){}
+      },250);
+      fdSetMsg('Point the camera at a barcode.');
+    });
+  }).catch(fail);
 }
 function stopScan(){
   clearInterval(scanTimer);scanTimer=null;
