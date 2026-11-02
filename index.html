@@ -485,7 +485,13 @@ function openTodos(){return D.todoItems.filter(function(t){return !t.done}).sort
 // One-time conversion: routines and today's focus become habits and tasks. Ids are reused so devices that convert separately still merge cleanly.
 function migrate(){
   D.settings=D.settings||{};
-  if(D.settings.habitsV2)return false;
+  var flag=false;try{flag=localStorage.getItem('antlyMigrated')==='1'}catch(e){}
+  if(D.settings.habitsV2||flag){
+    // Already converted on this device. If an old copy of the app overwrote the cloud settings, restore the marker instead of re-importing old routines.
+    try{localStorage.setItem('antlyMigrated','1')}catch(e){}
+    if(!D.settings.habitsV2){D.settings.habitsV2=true;save('settings')}
+    return false;
+  }
   var have={};D.weeklyTasks.forEach(function(h){have[h.id]=1});
   D.routineItems.forEach(function(r){if(!have[r.id])D.weeklyTasks.push({id:r.id,text:r.text,goal:7,days:[0,1,2,3,4,5,6]})});
   Object.keys(D.routineChecks).forEach(function(date){
@@ -494,7 +500,7 @@ function migrate(){
   });
   var today=todayKey(),has={};D.todoItems.forEach(function(t){has[t.id]=1});
   (D.focusByDate[today]||[]).forEach(function(f){if(!f.done&&!has[f.id])D.todoItems.push({id:f.id,text:f.text,done:false,due:today,priority:true})});
-  D.settings.habitsV2=true;
+  D.settings.habitsV2=true;try{localStorage.setItem('antlyMigrated','1')}catch(e){}
   ['weeklyTasks','weeklyChecks','todoItems','settings'].forEach(function(k){save(k)});
   return true;
 }
@@ -974,7 +980,7 @@ function rSync(){
   var tp=themePref();
   h+='<div><div class="eyebrow" style="margin-bottom:8px">Theme</div><div class="seg theme-seg">'+['auto','light','dark'].map(function(t){return '<button data-act="theme" data-v="'+t+'" aria-pressed="'+(tp===t)+'">'+t.charAt(0).toUpperCase()+t.slice(1)+'</button>'}).join('')+'</div></div>';
   h+='<div style="display:flex;gap:10px"><button class="btn ghost sm" style="flex:1" data-act="export">'+ic('download','s18')+'Export data</button><button class="btn ghost sm" style="flex:1" data-act="import">'+ic('upload','s18')+'Import data</button></div>';
-  h+='<button class="link" style="align-self:center" data-act="open-targets">Daily targets</button><a class="link" style="align-self:center" href="legacy/">Open the previous Daily Tracker</a>';
+  h+='<button class="link" style="align-self:center" data-act="open-targets">Daily targets</button>';
   $('#syncBody').innerHTML=h;
 }
 
