@@ -227,7 +227,7 @@ label.l{display:block;font-weight:600;margin-bottom:6px}
 .tgl{display:inline-flex;align-items:center;gap:6px;color:var(--sage);font-weight:600;font-size:13px}
 /* Chrome */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bg);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav.tabs .in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);padding:8px max(8px,env(safe-area-inset-left,0px)) 8px max(8px,env(safe-area-inset-right,0px))}
+nav.tabs .in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);padding:8px max(8px,env(safe-area-inset-left,0px)) 8px max(8px,env(safe-area-inset-right,0px))}
 .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:var(--fg3);font-size:12px;font-weight:500}
 .tab[aria-selected="true"]{color:var(--sage)}
 .tab[aria-selected="true"] .ms{font-variation-settings:'FILL' 1,'wght' 400}
@@ -260,6 +260,22 @@ video.cam{width:100%;border-radius:20px;background:var(--wash2);aspect-ratio:4/3
 .syncbtn.off{background:var(--wash2);color:var(--fg2)}
 .theme-seg{display:grid;grid-template-columns:repeat(3,1fr)}
 @media (prefers-reduced-motion:reduce){.sheet,.bar>i,.toast{transition:none}}
+.hab{display:flex;flex-direction:column;gap:12px}
+.hab-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.hab-name{text-align:left;min-width:0;flex:1;border-radius:10px}
+.hab-name b{display:block;font-size:16px;line-height:22px;font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere}
+.hab-name span{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--fg2)}
+.wd.sch i{box-shadow:inset 0 0 0 1.5px var(--sage-c)}
+.wd.sch i.on{box-shadow:none}
+.wd.off{opacity:.45}
+.wd{padding:2px 0;border-radius:10px}
+.mood.sm button{height:44px;border-radius:14px}
+.minigoal{display:flex;flex-direction:column;gap:8px;text-align:left;width:100%}
+.minigoal .h{display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.dchips{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dchip{height:44px;border-radius:12px;background:var(--wash2);color:var(--fg2);font-weight:600;font-size:12.5px}
+.dchip[aria-pressed="true"]{background:var(--sage-c);color:#fff}
+.more{align-self:flex-start}
 </style>
 </head>
 <body>
@@ -273,8 +289,7 @@ video.cam{width:100%;border-radius:20px;background:var(--wash2);aspect-ratio:4/3
   </header>
   <main>
     <section class="view on" id="v-today"></section>
-    <section class="view" id="v-tasks"></section>
-    <section class="view" id="v-goals"></section>
+    <section class="view" id="v-plan"></section>
     <section class="view" id="v-health"></section>
   </main>
 </div>
@@ -283,10 +298,9 @@ video.cam{width:100%;border-radius:20px;background:var(--wash2);aspect-ratio:4/3
 
 <nav class="tabs" aria-label="Main"><div class="in" role="tablist">
   <button class="tab" role="tab" data-act="tab" data-tab="today" aria-selected="true"><span class="ms">wb_sunny</span>Today</button>
-  <button class="tab" role="tab" data-act="tab" data-tab="goals" aria-selected="false"><span class="ms">flag</span>Goals</button>
-  <button class="tab" role="tab" data-act="tab" data-tab="tasks" aria-selected="false"><span class="ms">check_circle</span>Tasks</button>
+  <button class="tab" role="tab" data-act="tab" data-tab="plan" aria-selected="false"><span class="ms">checklist</span>Plan</button>
   <button class="tab" role="tab" data-act="tab" data-tab="health" aria-selected="false"><span class="ms">favorite</span>Health</button>
-</div></nav>
+</div>
 
 <div class="scrim" id="scrim"></div>
 
@@ -294,34 +308,40 @@ video.cam{width:100%;border-radius:20px;background:var(--wash2);aspect-ratio:4/3
   <div class="grab"></div>
   <div class="sheet-h"><h2 class="h-md">Quick action</h2><button class="x" data-act="close" aria-label="Close"><span class="ms">close</span></button></div>
   <div class="list">
-    <button class="row" data-act="qa-water"><span class="rowmain"><span class="ms" style="color:var(--sage)">water_drop</span><span class="tx"><span>Log a glass of water</span></span></span></button>
-    <button class="row" data-act="qa-task"><span class="rowmain"><span class="ms" style="color:var(--terra)">add_task</span><span class="tx"><span>Add a task or routine</span></span></span></button>
+    <button class="row" data-act="qa-habit"><span class="rowmain"><span class="ms" style="color:var(--sage)">repeat</span><span class="tx"><span>Add a habit</span></span></span></button>
+    <button class="row" data-act="qa-task"><span class="rowmain"><span class="ms" style="color:var(--terra)">add_task</span><span class="tx"><span>Add a task</span></span></span></button>
     <button class="row" data-act="qa-goal"><span class="rowmain"><span class="ms" style="color:var(--sage)">flag</span><span class="tx"><span>Add a goal</span></span></span></button>
+    <button class="row" data-act="qa-water"><span class="rowmain"><span class="ms" style="color:var(--sage)">water_drop</span><span class="tx"><span>Log a glass of water</span></span></span></button>
     <button class="row" data-act="qa-mood"><span class="rowmain"><span class="ms" style="color:var(--sage)">sentiment_satisfied</span><span class="tx"><span>Check in on mood</span></span></span></button>
     <button class="row" data-act="qa-food"><span class="rowmain"><span class="ms" style="color:var(--olive)">restaurant_menu</span><span class="tx"><span>Log food (optional)</span></span></span></button>
   </div>
 </div></div>
 
+<div class="sheet" id="shHabit" role="dialog" aria-label="Habit"><div class="in">
+  <div class="grab"></div>
+  <div class="sheet-h"><h2 class="h-md" id="hbHead">Add a habit</h2><button class="x" data-act="close" aria-label="Close"><span class="ms">close</span></button></div>
+  <div><label class="l" for="hbTitle">Habit</label><input class="field" id="hbTitle" placeholder="e.g. Morning workout" autocomplete="off"></div>
+  <div><div class="l">Which days?</div>
+    <div class="seg" style="margin-bottom:10px"><button data-act="hpreset" data-v="all">Every day</button><button data-act="hpreset" data-v="weekdays">Weekdays</button><button data-act="hpreset" data-v="weekend">Weekends</button></div>
+    <div class="dchips" id="hbDays" role="group" aria-label="Days"></div></div>
+  <button class="btn" data-act="save-habit" id="hbSave">Add habit</button>
+  <button class="btn danger" data-act="del-habit" id="hbDel" hidden>Delete habit</button>
+</div></div>
+
 <div class="sheet" id="shTask" role="dialog" aria-label="Add task"><div class="in">
   <div class="grab"></div>
-  <div class="sheet-h"><h2 class="h-md">Add to your day</h2><button class="x" data-act="close" aria-label="Close"><span class="ms">close</span></button></div>
-  <div><label class="l" for="ntTitle">What is it?</label><input class="field" id="ntTitle" placeholder="e.g. Send the POC summary"></div>
-  <div><label class="l" for="ntSec">Where does it go?</label>
-    <select class="field" id="ntSec"><option value="todo">To-do</option><option value="focus">Today's focus (max 3)</option><option value="morning">Morning routine</option><option value="evening">Evening wind-down</option></select></div>
-  <div id="ntTodoOpts" style="display:flex;flex-direction:column;gap:14px">
-    <div><label class="l" for="ntDue">Due date (optional)</label><input class="field" type="date" id="ntDue"></div>
-    <label class="chk"><input type="checkbox" id="ntPri">High priority</label>
-  </div>
-  <button class="btn" data-act="save-task">Add</button>
+  <div class="sheet-h"><h2 class="h-md">Add a task</h2><button class="x" data-act="close" aria-label="Close"><span class="ms">close</span></button></div>
+  <div><label class="l" for="ntTitle">What needs doing?</label><input class="field" id="ntTitle" placeholder="e.g. Send the POC summary" autocomplete="off"></div>
+  <div><label class="l" for="ntDue">Due date (optional)</label><input class="field" type="date" id="ntDue"></div>
+  <label class="chk"><input type="checkbox" id="ntPri">High priority</label>
+  <button class="btn" data-act="save-task">Add task</button>
 </div></div>
 
 <div class="sheet" id="shGoal" role="dialog" aria-label="Add goal"><div class="in">
   <div class="grab"></div>
   <div class="sheet-h"><h2 class="h-md">Add a goal</h2><button class="x" data-act="close" aria-label="Close"><span class="ms">close</span></button></div>
-  <div class="seg" id="ngType"><button data-act="ngtype" data-v="weekly" aria-pressed="true">Weekly habit</button><button data-act="ngtype" data-v="long" aria-pressed="false">Long-term goal</button></div>
-  <div><label class="l" for="ngTitle">Goal</label><input class="field" id="ngTitle" placeholder="e.g. Run 5km"></div>
-  <div id="ngWeeklyOpts"><label class="l" for="ngDays">Days per week</label><select class="field" id="ngDays"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
-  <div id="ngLongOpts" hidden><label class="l" for="ngDue">Target date (optional)</label><input class="field" type="date" id="ngDue"></div>
+  <div><label class="l" for="ngTitle">Goal</label><input class="field" id="ngTitle" placeholder="e.g. Ship the new app" autocomplete="off"></div>
+  <div><label class="l" for="ngDue">Target date (optional)</label><input class="field" type="date" id="ngDue"></div>
   <button class="btn" data-act="save-goal">Add goal</button>
 </div></div>
 
@@ -399,35 +419,55 @@ function save(key){
   if(!window.cloudSignedIn){try{localStorage.setItem('trackerDirty','1')}catch(e){}}
   if(window.cloudPush)window.cloudPush();
 }
-var UI={tab:'today',selDate:todayKey(),tasksWk:0,goalsWk:0,gfilter:'all',showDone:false,foodOff:0,foodOpen:false,userName:'',
+var UI={tab:'today',wk:0,plan:'habits',showDone:false,hdays:[0,1,2,3,4,5,6],editHabit:null,foodOff:0,foodOpen:false,userName:'',
   sync:{kind:'off',msg:'Saved on this device only.',email:''},
   fd:{tab:'search',q:'',results:[],msg:'',picked:null,code:'',scanning:false}};
 function waterGoal(){var g=parseInt((D.settings||{}).waterGoal,10);return g>0?g:8}
 
-/* ---------- stats ---------- */
-function routineDayComplete(ds){if(!D.routineItems.length)return false;var c=D.routineChecks[ds]||{};return D.routineItems.every(function(i){return c[i.id]})}
-function streakFrom(fn){var d=new Date();d.setHours(0,0,0,0);if(!fn(ymd(d)))d=addDays(d,-1);var n=0;while(fn(ymd(d))&&n<3650){n++;d=addDays(d,-1)}return n}
-var overallStreak=function(){return streakFrom(routineDayComplete)};
-var habitStreak=function(id){return streakFrom(function(ds){return !!(D.routineChecks[ds]||{})[id]})};
-function weekPctFor(monday){
-  var wk=ymd(monday),s=0,g=0;
-  D.weeklyTasks.forEach(function(t){
-    var chk=((D.weeklyChecks[wk]||{})[t.id])||{},sc=0;
-    for(var i=0;i<7;i++)if(chk[ymd(addDays(monday,i))])sc++;
-    var goal=t.goal||1;s+=Math.min(sc,goal);g+=goal;
+/* ---------- habits and stats ---------- */
+function isoMonday(iso){return ymd(getMonday(parseYMD(iso)))}
+function dowOf(iso){return (parseYMD(iso).getDay()+6)%7}
+function sched(h,iso){return !h.days||h.days.indexOf(dowOf(iso))>-1}
+function checked(h,iso){return !!(((D.weeklyChecks[isoMonday(iso)]||{})[h.id])||{})[iso]}
+function setChecked(h,iso,v){var wk=isoMonday(iso);D.weeklyChecks[wk]=D.weeklyChecks[wk]||{};D.weeklyChecks[wk][h.id]=D.weeklyChecks[wk][h.id]||{};D.weeklyChecks[wk][h.id][iso]=v;save('weeklyChecks')}
+function habitsOn(iso){return D.weeklyTasks.filter(function(h){return sched(h,iso)})}
+function habitGoal(h){return h.days&&h.days.length?h.days.length:(h.goal||1)}
+function weekScore(h,mon){var s=0;for(var i=0;i<7;i++)if(checked(h,ymd(addDays(mon,i))))s++;return s}
+function weekPctFor(mon){var s=0,g=0;D.weeklyTasks.forEach(function(h){var goal=habitGoal(h);s+=Math.min(weekScore(h,mon),goal);g+=goal});return g?Math.round(s/g*100):0}
+function habitStreak(h){
+  var d=new Date();d.setHours(0,0,0,0);var n=0,guard=0,today=todayKey();
+  while(guard++<3700){var k=ymd(d);if(sched(h,k)){if(checked(h,k))n++;else if(k!==today)break}d=addDays(d,-1)}
+  return n;
+}
+function dayHabitStats(iso){var hs=habitsOn(iso),done=hs.filter(function(h){return checked(h,iso)}).length;return {tot:hs.length,done:done,pct:hs.length?Math.round(done/hs.length*100):0}}
+function overallStreak(){
+  var d=new Date();d.setHours(0,0,0,0);var n=0,guard=0,today=todayKey();
+  while(guard++<3700){var k=ymd(d),st=dayHabitStats(k);if(st.tot){if(st.done===st.tot)n++;else if(k!==today)break}d=addDays(d,-1)}
+  return n;
+}
+function daysLabel(h){
+  if(!h.days||h.days.length===7)return 'Every day';
+  var k=h.days.slice().sort().join('');
+  if(k==='01234')return 'Weekdays';if(k==='56')return 'Weekends';
+  return h.days.slice().sort().map(function(i){return DAYN[i]}).join(' ');
+}
+function goalsAvg(){return D.goalItems.length?Math.round(D.goalItems.reduce(function(a,g){return a+(g.progress||0)},0)/D.goalItems.length):null}
+function openTodos(){return D.todoItems.filter(function(t){return !t.done}).sort(function(a,b){return (b.priority?1:0)-(a.priority?1:0)||(a.due||'9999').localeCompare(b.due||'9999')})}
+// One-time conversion: routines and today's focus become habits and tasks. Ids are reused so devices that convert separately still merge cleanly.
+function migrate(){
+  D.settings=D.settings||{};
+  if(D.settings.habitsV2)return false;
+  var have={};D.weeklyTasks.forEach(function(h){have[h.id]=1});
+  D.routineItems.forEach(function(r){if(!have[r.id])D.weeklyTasks.push({id:r.id,text:r.text,goal:7,days:[0,1,2,3,4,5,6]})});
+  Object.keys(D.routineChecks).forEach(function(date){
+    var c=D.routineChecks[date]||{},wk=isoMonday(date);
+    Object.keys(c).forEach(function(id){if(c[id]){D.weeklyChecks[wk]=D.weeklyChecks[wk]||{};D.weeklyChecks[wk][id]=D.weeklyChecks[wk][id]||{};D.weeklyChecks[wk][id][date]=true}});
   });
-  return g?Math.round(s/g*100):0;
-}
-function dayStats(ds){
-  var rc=D.routineChecks[ds]||{},f=D.focusByDate[ds]||[];
-  var tot=D.routineItems.length+f.length;
-  var done=D.routineItems.filter(function(i){return rc[i.id]}).length+f.filter(function(x){return x.done}).length;
-  return {tot:tot,done:done,pct:tot?Math.round(done/tot*100):0};
-}
-function goalsPct(){
-  if(D.weeklyTasks.length)return weekPctFor(getMonday(new Date()));
-  if(D.goalItems.length)return Math.round(D.goalItems.reduce(function(a,g){return a+(g.progress||0)},0)/D.goalItems.length);
-  return null;
+  var today=todayKey(),has={};D.todoItems.forEach(function(t){has[t.id]=1});
+  (D.focusByDate[today]||[]).forEach(function(f){if(!f.done&&!has[f.id])D.todoItems.push({id:f.id,text:f.text,done:false,due:today,priority:true})});
+  D.settings.habitsV2=true;
+  ['weeklyTasks','weeklyChecks','todoItems','settings'].forEach(function(k){save(k)});
+  return true;
 }
 function waterToday(){return +(D.waterByDate[todayKey()]||0)}
 function healthPct(){return Math.round((Math.min(100,waterToday()/waterGoal()*100)+(D.moodByDate[todayKey()]?100:0))/2)}
@@ -467,45 +507,6 @@ function moodButtons(){
 }
 function greetingText(){var h=new Date().getHours();return (h<12?'Good morning':h<17?'Good afternoon':'Good evening')+(UI.userName?', '+esc(UI.userName):'')}
 
-function vToday(){
-  var today=todayKey(),st=dayStats(today),gp=goalsPct(),hp=healthPct();
-  var parts=[hp];if(gp!==null)parts.push(Math.min(100,gp));if(st.tot)parts.push(st.pct);
-  var bal=Math.round(parts.reduce(function(a,b){return a+b},0)/parts.length);
-  var focus=D.focusByDate[today]||[];
-  var prime=focus.filter(function(x){return !x.done})[0];
-  var rc=D.routineChecks[today]||{};
-  var openTodos=D.todoItems.filter(function(t){return !t.done});
-  var overdue=openTodos.filter(function(t){return t.due&&t.due<today}).length;
-  var h='';
-  h+='<div><div class="eyebrow">'+new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})+'</div><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px"><h1 class="h-xl">'+greetingText()+'</h1><span class="pill wash"><span class="dot" style="color:var(--sage)"></span>'+(bal>=70?'In Flow':bal>=30?'Building':'Fresh start')+'</span></div></div>';
-  h+='<div class="card harmony"><div><h2 class="h-md">Daily Harmony</h2><p class="muted">Tasks, goals and health in one rhythm</p></div>';
-  h+='<div class="harmony-row"><div class="ring">'+ring(bal,40,8,'var(--sage-c)')+'<div class="c"><b class="num">'+bal+'%</b><span>BALANCE</span></div></div><div class="meters">';
-  h+='<div><div class="meter-h"><span>Goals Target</span><span class="num">'+(gp===null?'—':gp+'%')+'</span></div>'+bar(gp||0,'sage')+'</div>';
-  h+='<div><div class="meter-h"><span>Tasks Closed</span><span class="num">'+st.done+' / '+st.tot+'</span></div>'+bar(st.pct,'terra')+'</div>';
-  h+='<div><div class="meter-h"><span>Health Habits</span><span class="num">'+hp+'%</span></div>'+bar(hp,'olive')+'</div></div></div>';
-  var note=!st.tot&&!openTodos.length?'Add a focus or a routine to get going.':st.pct===100?'Everything for today is done. Nice work.':(st.tot-st.done)+' thing'+(st.tot-st.done===1?'':'s')+' left in your focus and routine'+(openTodos.length?'; '+openTodos.length+' open to-do'+(openTodos.length===1?'':'s')+(overdue?' ('+overdue+' overdue)':''):'')+'.';
-  h+='<div class="note">'+ic('eco','s18')+'<span style="flex:1">'+esc(note)+'</span><span class="pill sage num">'+overallStreak()+'d streak</span></div></div>';
-  h+='<div class="sec"><div class="sec-h"><span class="eyebrow">Prime objective</span>'+(prime?'<span class="eyebrow" style="color:var(--terra)">Today’s focus</span>':'')+'</div>';
-  if(prime)h+='<div class="card"><button class="prime" data-act="tog" data-kind="focus" data-id="'+prime.id+'" data-date="'+today+'"><span class="cb" style="width:40px;height:40px;border-radius:10px;border-width:2px"></span><span class="t"><span class="h-sm" style="display:block">'+esc(prime.text)+'</span><span class="meta"><span class="time">'+ic('flag','s14')+focus.filter(function(x){return x.done}).length+' of '+focus.length+' priorities done</span></span></span></button></div>';
-  else if(focus.length)h+='<div class="card" style="display:flex;gap:14px;align-items:center">'+ic('stars','s24 f')+'<div><b>Focus cleared</b><p class="muted">Every priority for today is done.</p></div></div>';
-  else h+='<div class="card" style="display:flex;gap:14px;align-items:center"><div style="flex:1"><b>No focus set for today</b><p class="muted">Pick up to three priorities.</p></div><button class="btn sm" data-act="open-add" data-sec="focus">Set focus</button></div>';
-  h+='</div>';
-  h+='<div class="sec"><div class="sec-h"><h2 class="h-md">Daily Routine</h2><button class="link" data-act="go" data-tab="tasks">See All</button></div>';
-  if(D.routineItems.length){h+='<div class="chips">'+D.routineItems.map(function(r){var d=!!rc[r.id],s=habitStreak(r.id);return '<button class="rt'+(d?' done':'')+'" data-act="tog" data-kind="routine" data-id="'+r.id+'" data-date="'+today+'" aria-pressed="'+d+'"><span class="ic">'+ic(iconFor(r.text),d?'f':'')+'</span><span class="ck">'+ic('check','s16')+'</span><span><b>'+esc(r.text)+'</b><small>'+(s>1?s+'-day streak':d?'Done':'Tap to check in')+'</small></span></button>'}).join('')+'</div>'}
-  else h+='<div class="empty">No routines yet. Add one from Quick Action.</div>';
-  h+='</div>';
-  h+='<div class="sec"><div class="sec-h"><h2 class="h-md">How are you feeling?</h2><span class="faint" style="font-size:13px">Mood check-in</span></div><div class="card sm">'+moodButtons()+'<p class="mood-note">'+(D.moodByDate[today]?'Logged as '+MOODN[D.moodByDate[today]-1].toLowerCase()+'. '+moodWeekText()+'.':'Tap one to log how today feels.')+'</p></div></div>';
-  var kc=Math.round(dayTotals(today).cal);
-  h+='<div class="sec"><div class="sec-h"><h2 class="h-md">Health at a glance</h2><button class="link" data-act="go" data-tab="health">Open Health</button></div><div class="card glance">';
-  h+='<div class="r"><span class="ic">'+ic('water_drop','s20 f')+'</span><div class="m"><div style="display:flex;justify-content:space-between"><b>Water</b><span class="muted num">'+waterToday()+' / '+waterGoal()+' glasses</span></div><div class="glasses">'+glassBars()+'</div></div><button class="plus" style="width:36px;height:36px" data-act="water" data-v="1" aria-label="Add a glass of water">'+ic('add','s20')+'</button></div>';
-  h+='<div class="r"><span class="ic" style="color:var(--olive)">'+ic('restaurant','s20')+'</span><div class="m"><b>Food</b> <span class="faint" style="font-size:13px">· '+(kc?kc.toLocaleString()+' kcal logged':'optional')+'</span></div><button class="pill wash" data-act="open-food" style="height:32px;padding:0 14px">+ Log</button></div></div></div>';
-  h+='<div class="quote"><span class="n">'+ic('format_quote','s20')+'</span><div><em>“Small steps, taken daily, carry the whole colony.”</em><small class="faint">The Antly way</small></div></div>';
-  return h;
-}
-
-function taskRow(kind,id,text,done,date,tags){
-  return '<div class="row'+(done?' done':'')+'"><button class="rowmain" data-act="tog" data-kind="'+kind+'" data-id="'+id+'" data-date="'+date+'" aria-pressed="'+done+'"><span class="cb">'+ic('check','s16')+'</span><span class="tx"><span>'+esc(text)+'</span>'+(tags?'<span class="tags">'+tags+'</span>':'')+'</span></button><button class="rowx" data-act="del" data-kind="'+kind+'" data-id="'+id+'" data-date="'+date+'" aria-label="Delete '+esc(text)+'">'+ic('close','s18')+'</button></div>';
-}
 function todoTags(t){
   var tags='';
   if(t.priority&&!t.done)tags+='<span class="pill terra"><span class="dot"></span>High Priority</span>';
@@ -518,81 +519,102 @@ function todoTags(t){
   }
   return tags;
 }
-function vTasks(){
-  var mon=addDays(getMonday(new Date()),UI.tasksWk*7),today=todayKey(),ds=UI.selDate,st=dayStats(ds);
-  var h='<div class="weeknav"><button class="iconbtn" data-act="twk" data-v="-1" aria-label="Previous week">'+ic('chevron_left','s20')+'</button><div class="t" style="text-align:center"><div class="eyebrow">'+(UI.tasksWk===0?'This week':'Week of')+'</div><h1 class="h-md">'+mon.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' – '+addDays(mon,6).toLocaleDateString(undefined,{month:'short',day:'numeric'})+'</h1></div><button class="iconbtn" data-act="twk" data-v="1" aria-label="Next week">'+ic('chevron_right','s20')+'</button></div>';
-  h+='<div class="weekcard" role="group" aria-label="Pick a day">';
-  for(var i=0;i<7;i++){var d=addDays(mon,i),k=ymd(d);h+='<button class="day'+(k===today?' is-today':'')+'" data-act="selday" data-date="'+k+'" aria-pressed="'+(k===ds)+'" aria-label="'+DAYN[i]+' '+d.getDate()+'"><small>'+DAYS[i]+'</small><b class="num">'+d.getDate()+'</b><i class="'+(dayStats(k).done>0?'has':'')+'"></i></button>'}
-  h+='</div>';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="muted">'+(ds===today?'Today':parseYMD(ds).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}))+'</span><span class="pill sage num">'+st.pct+'% Done</span></div>';
-  // focus
-  var focus=D.focusByDate[ds]||[];
-  h+='<div class="sec"><div class="group-h"><div class="l">'+ic('stars','s20')+'Today’s Focus</div><span class="pill wash num">'+focus.filter(function(x){return x.done}).length+'/'+focus.length+'</span></div><div class="list">';
-  h+=focus.length?focus.map(function(f){return taskRow('focus',f.id,f.text,f.done,ds,'')}).join(''):'<div class="empty">No priorities set for this day.</div>';
-  if(focus.length<3)h+='<button class="btn ghost sm" data-act="open-add" data-sec="focus">'+ic('add','s18')+'Add a priority</button>';
+function taskRow(t,withDel){
+  return '<div class="row'+(t.done?' done':'')+'"><button class="rowmain" data-act="tog" data-id="'+t.id+'" aria-pressed="'+!!t.done+'"><span class="cb">'+ic('check','s16')+'</span><span class="tx"><span>'+esc(t.text)+'</span>'+(todoTags(t)?'<span class="tags">'+todoTags(t)+'</span>':'')+'</span></button>'+(withDel?'<button class="rowx" data-act="del" data-kind="task" data-id="'+t.id+'" aria-label="Delete '+esc(t.text)+'">'+ic('close','s18')+'</button>':'')+'</div>';
+}
+function habitRow(h,iso){
+  var done=checked(h,iso),s=habitStreak(h),tags='';
+  if(s>1)tags+='<span class="fire">'+ic('local_fire_department','s16 f')+s+' days</span>';
+  if(h.days&&h.days.length<7)tags+='<span class="time">'+esc(daysLabel(h))+'</span>';
+  else if(!h.days)tags+='<span class="time num">'+weekScore(h,getMonday(parseYMD(iso)))+'/'+habitGoal(h)+' this week</span>';
+  return '<div class="row'+(done?' done':'')+'"><button class="rowmain" data-act="hab" data-id="'+h.id+'" data-date="'+iso+'" aria-pressed="'+done+'"><span class="cb">'+ic('check','s16')+'</span><span class="tx"><span>'+esc(h.text)+'</span>'+(tags?'<span class="tags">'+tags+'</span>':'')+'</span></button></div>';
+}
+
+function vToday(){
+  var today=todayKey(),hs=habitsOn(today),st=dayHabitStats(today),gp=goalsAvg(),hp=healthPct();
+  var parts=[hp];if(st.tot)parts.push(st.pct);if(gp!==null)parts.push(gp);
+  var bal=Math.round(parts.reduce(function(a,b){return a+b},0)/parts.length);
+  var open=openTodos(),overdue=open.filter(function(t){return t.due&&t.due<today}).length;
+  var h='';
+  h+='<div><div class="eyebrow">'+new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})+'</div><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px"><h1 class="h-xl">'+greetingText()+'</h1><span class="pill wash"><span class="dot" style="color:var(--sage)"></span>'+(bal>=70?'In Flow':bal>=30?'Building':'Fresh start')+'</span></div></div>';
+  var note=(!st.tot&&!open.length)?'Add a habit or a task to get going.':(st.tot&&st.done===st.tot)?'All habits done today.'+(open.length?' '+open.length+' task'+(open.length===1?'':'s')+' open.':''):(st.tot-st.done)+' habit'+(st.tot-st.done===1?'':'s')+' left today'+(open.length?' and '+open.length+' open task'+(open.length===1?'':'s')+(overdue?' ('+overdue+' overdue)':''):'')+'.';
+  h+='<div class="card harmony"><div class="harmony-row"><div class="ring">'+ring(bal,40,8,'var(--sage-c)')+'<div class="c"><b class="num">'+bal+'%</b><span>BALANCE</span></div></div><div class="meters">';
+  h+='<div><div class="meter-h"><span>Habits</span><span class="num">'+st.done+' / '+st.tot+'</span></div>'+bar(st.pct,'sage')+'</div>';
+  h+='<div><div class="meter-h"><span>Goals</span><span class="num">'+(gp===null?'—':gp+'%')+'</span></div>'+bar(gp||0,'terra')+'</div>';
+  h+='<div><div class="meter-h"><span>Health</span><span class="num">'+hp+'%</span></div>'+bar(hp,'olive')+'</div></div></div>';
+  h+='<div class="note">'+ic('eco','s18')+'<span style="flex:1">'+esc(note)+'</span><span class="pill sage num">'+overallStreak()+'d streak</span></div></div>';
+  // habits
+  h+='<div class="sec"><div class="sec-h"><h2 class="h-md">Today’s habits</h2><button class="link" data-act="plan" data-v="habits">Manage</button></div><div class="list">';
+  h+=hs.length?hs.map(function(x){return habitRow(x,today)}).join(''):'<div class="empty">'+(D.weeklyTasks.length?'No habits scheduled for today.':'No habits yet.')+' <button class="link" data-act="open-habit">Add a habit</button></div>';
   h+='</div></div>';
-  // routines
-  var rc=D.routineChecks[ds]||{};
-  [['morning','Morning Routine','wb_twilight'],['evening','Evening Wind-down','bedtime']].forEach(function(g){
-    var its=D.routineItems.filter(function(r){return g[0]==='evening'?r.when==='evening':r.when!=='evening'});
-    var c=its.filter(function(r){return rc[r.id]}).length;
-    h+='<div class="sec"><div class="group-h"><div class="l">'+ic(g[2],'s20')+g[1]+'</div><span class="pill wash num">'+c+'/'+its.length+'</span></div><div class="list">';
-    h+=its.length?its.map(function(r){var s=habitStreak(r.id);return taskRow('routine',r.id,r.text,!!rc[r.id],ds,s>1?'<span class="fire">'+ic('local_fire_department','s16 f')+s+' days</span>':'')}).join(''):'<div class="empty">Nothing here yet.</div>';
+  // tasks
+  h+='<div class="sec"><div class="sec-h"><h2 class="h-md">Tasks</h2><button class="link" data-act="plan" data-v="tasks">See all'+(open.length>4?' ('+open.length+')':'')+'</button></div><div class="list">';
+  h+=open.length?open.slice(0,4).map(function(t){return taskRow(t,false)}).join(''):'<div class="empty">Nothing open. <button class="link" data-act="open-task">Add a task</button></div>';
+  h+='</div></div>';
+  // goals
+  var gl=D.goalItems.filter(function(g){return (g.progress||0)<100}).sort(function(a,b){return (b.pinned?1:0)-(a.pinned?1:0)}).slice(0,3);
+  if(gl.length){
+    h+='<div class="sec"><div class="sec-h"><h2 class="h-md">Goals</h2><button class="link" data-act="plan" data-v="goals">See all</button></div><div class="card sm" style="display:flex;flex-direction:column;gap:14px">';
+    gl.forEach(function(g){var p=g.progress||0;h+='<button class="minigoal" data-act="plan" data-v="goals"><span class="h"><span style="overflow-wrap:anywhere">'+esc(g.text)+'</span><span class="num muted">'+p+'%</span></span>'+bar(p,'sage')+'</button>'});
     h+='</div></div>';
-  });
-  // todos
-  var open=D.todoItems.filter(function(t){return !t.done}).sort(function(a,b){return (b.priority?1:0)-(a.priority?1:0)||(a.due||'9999').localeCompare(b.due||'9999')});
-  var done=D.todoItems.filter(function(t){return t.done});
-  h+='<div class="sec"><div class="group-h"><div class="l">'+ic('psychology','s20')+'Deep Work &amp; Priority</div><span class="pill terra num">'+open.length+' open</span></div><div class="list">';
-  h+=open.length?open.map(function(t){return taskRow('todo',t.id,t.text,false,ds,todoTags(t))}).join(''):'<div class="empty">Nothing open. Add a task below.</div>';
-  if(done.length){
-    h+='<button class="tgl" data-act="toggle-done">'+ic(UI.showDone?'expand_less':'expand_more','s18')+(UI.showDone?'Hide':'Show')+' completed ('+done.length+')</button>';
-    if(UI.showDone){h+=done.map(function(t){return taskRow('todo',t.id,t.text,true,ds,todoTags(t))}).join('');h+='<button class="link" style="align-self:flex-start" data-act="clear-done">Clear completed</button>'}
   }
-  h+='</div></div>';
-  var morn=D.routineItems.filter(function(r){return r.when!=='evening'});
-  var mdone=morn.filter(function(r){return (D.routineChecks[today]||{})[r.id]}).length;
-  h+='<div class="insight"><span class="ic">'+ic('spa','s24 f')+'</span><div><b>Pacing Insight</b><p class="muted">'+(!morn.length?'Add a morning routine to anchor the day.':mdone===morn.length?'Morning routine complete. Good time for deep work.':'Finish the morning routine and the day tends to follow.')+'</p></div></div>';
-  h+='<form class="addbar" id="quickAdd">'+ic('add_task','s24')+'<input id="qaText" placeholder="Add a new task…" aria-label="New task" autocomplete="off"><button class="btn sm" type="submit">Add '+ic('arrow_upward','s18')+'</button></form>';
+  // health
+  var kc=Math.round(dayTotals(today).cal),m=D.moodByDate[today];
+  h+='<div class="sec"><div class="sec-h"><h2 class="h-md">Health</h2><button class="link" data-act="go" data-tab="health">Open</button></div><div class="card glance">';
+  h+='<div class="r" style="flex-direction:column;align-items:stretch;gap:8px"><div style="display:flex;justify-content:space-between"><b>Mood</b><span class="muted" style="font-size:13px">'+(m?MOODN[m-1]:'Tap to check in')+'</span></div><div class="mood sm" role="group" aria-label="Mood today">'+MOODI.map(function(n,i){return '<button data-act="mood" data-v="'+(i+1)+'" aria-pressed="'+(m===i+1)+'" aria-label="'+MOODN[i]+'">'+ic(n,'s20'+(m===i+1?' f':''))+'</button>'}).join('')+'</div></div>';
+  h+='<div class="r"><span class="ic">'+ic('water_drop','s20 f')+'</span><div class="m"><div style="display:flex;justify-content:space-between"><b>Water</b><span class="muted num">'+waterToday()+' / '+waterGoal()+' glasses</span></div><div class="glasses">'+glassBars()+'</div></div><button class="plus" style="width:36px;height:36px" data-act="water" data-v="1" aria-label="Add a glass of water">'+ic('add','s20')+'</button></div>';
+  h+='<div class="r"><span class="ic" style="color:var(--olive)">'+ic('restaurant','s20')+'</span><div class="m"><b>Food</b> <span class="faint" style="font-size:13px">· '+(kc?kc.toLocaleString()+' kcal logged':'optional')+'</span></div><button class="pill wash" data-act="open-food" style="height:32px;padding:0 14px">+ Log</button></div></div></div>';
   return h;
 }
 
-function vGoals(){
-  var mon=addDays(getMonday(new Date()),UI.goalsWk*7),wk=ymd(mon),today=todayKey();
-  var h='<div class="filters" role="group" aria-label="Filter goals">'+[['all','All Goals'],['weekly','Weekly habits'],['long','Long-term']].map(function(c){return '<button class="fchip" data-act="gf" data-v="'+c[0]+'" aria-pressed="'+(UI.gfilter===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>';
-  var ss=overallStreak();
-  h+='<div class="streak"><span class="lf">'+ic('eco','s24 f')+'</span><div class="t"><div class="h-md">'+ss+'-Day Streak</div><span>'+(ss?'Every routine checked, '+ss+' day'+(ss===1?'':'s')+' in a row':'Finish every routine today to start a streak')+'</span></div></div>';
-  var showW=UI.gfilter!=='long',showL=UI.gfilter!=='weekly';
-  if(showW){
-    h+='<div class="weeknav"><button class="iconbtn" data-act="gwk" data-v="-1" aria-label="Previous week">'+ic('chevron_left','s20')+'</button><div style="text-align:center"><div class="eyebrow">'+(UI.goalsWk===0?'This week':'Week of')+'</div><h2 class="h-sm">'+mon.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' – '+addDays(mon,6).toLocaleDateString(undefined,{month:'short',day:'numeric'})+'</h2></div><button class="iconbtn" data-act="gwk" data-v="1" aria-label="Next week">'+ic('chevron_right','s20')+'</button></div>';
-    if(!D.weeklyTasks.length)h+='<div class="empty">No weekly habits yet. Add one to track how many days a week you show up.</div>';
-    D.weeklyTasks.forEach(function(t){
-      var chk=((D.weeklyChecks[wk]||{})[t.id])||{},score=0;
-      for(var i=0;i<7;i++)if(chk[ymd(addDays(mon,i))])score++;
-      var goal=t.goal||1,p=Math.min(100,Math.round(score/goal*100)),done=score>=goal;
-      h+='<div class="card goal"><div class="goal-top"><div class="tx"><div class="tags"><span class="pill '+(done?'sage':'wash')+'">Weekly habit</span>'+(done?'<span class="pill sage">'+ic('check_circle','s14 f')+'Done</span>':'')+'</div><h3>'+esc(t.text)+'</h3><p class="muted num">'+score+' of '+goal+' days</p></div><button class="pin" data-act="del" data-kind="weekly" data-id="'+t.id+'" aria-label="Delete '+esc(t.text)+'">'+ic('delete','s20')+'</button></div>';
-      h+='<div class="week"><div class="week-h"><span>Days this week</span><span class="num">'+p+'%</span></div><div class="wdays">';
-      for(var j=0;j<7;j++){var k=ymd(addDays(mon,j));h+='<button class="wd'+(k===today?' today':'')+'" data-act="wkday" data-id="'+t.id+'" data-wk="'+wk+'" data-date="'+k+'" aria-pressed="'+!!chk[k]+'" aria-label="'+DAYN[j]+(chk[k]?' done':'')+'"><i class="'+(chk[k]?'on':'')+'">'+ic('check','s16')+'</i>'+DAYS[j]+'</button>'}
-      h+='</div>'+bar(p,'sage')+'<div style="display:flex;align-items:center;justify-content:space-between"><span class="muted" style="font-size:13px">Target per week</span><div class="stepper"><button data-act="wkgoal" data-id="'+t.id+'" data-v="-1" aria-label="Fewer days">'+ic('remove','s18')+'</button><span class="num">'+goal+' days</span><button data-act="wkgoal" data-id="'+t.id+'" data-v="1" aria-label="More days">'+ic('add','s18')+'</button></div></div></div></div>';
-    });
-  }
-  if(showL){
-    h+='<div class="sec-h"><h2 class="h-md">Long-term goals</h2></div>';
-    if(!D.goalItems.length)h+='<div class="empty">No long-term goals yet. Add one and move the slider as you make progress.</div>';
-    var sorted=D.goalItems.slice().sort(function(a,b){return ((a.progress||0)>=100?1:0)-((b.progress||0)>=100?1:0)||(b.pinned?1:0)-(a.pinned?1:0)});
-    sorted.forEach(function(g){
-      var p=g.progress||0,due='';
-      if(g.due){var d=daysBetween(today,g.due);due=p>=100?'<span class="pill sage">Done</span>':d<0?'<span class="pill over">'+(-d)+' day'+(d===-1?'':'s')+' overdue</span>':'<span class="pill '+(d<=14?'olive':'wash')+'">'+(d===0?'Due today':d+' day'+(d===1?'':'s')+' left')+' · '+fmtShort(g.due)+'</span>'}
-      h+='<div class="card goal'+(p>=100?' done':'')+'"><div class="goal-top"><div class="tx"><div class="tags"><span class="pill wash">Long-term</span>'+due+'</div><h3>'+esc(g.text)+'</h3></div><button class="pin'+(g.pinned?' on':'')+'" data-act="gpin" data-id="'+g.id+'" aria-label="'+(g.pinned?'Unpin':'Pin')+'" aria-pressed="'+!!g.pinned+'">'+ic('push_pin','s20'+(g.pinned?' f':''))+'</button><button class="pin" data-act="del" data-kind="goal" data-id="'+g.id+'" aria-label="Delete '+esc(g.text)+'">'+ic('delete','s20')+'</button></div>';
-      h+=bar(p,'sage')+'<div style="display:flex;align-items:center;gap:12px"><input class="range" type="range" min="0" max="100" step="5" value="'+p+'" data-prog="'+g.id+'" aria-label="Progress for '+esc(g.text)+'"><b class="num" id="gp-'+g.id+'" style="min-width:42px;text-align:right">'+p+'%</b></div></div>';
-    });
-  }
-  h+='<button class="btn ghost" data-act="open-goal">'+ic('add','s20')+'Add a goal</button>';
-  // history
+function vPlan(){
+  var h='<div class="seg" role="tablist" aria-label="Plan sections">'+[['habits','Habits'],['tasks','Tasks'],['goals','Goals']].map(function(c){return '<button role="tab" data-act="plan" data-v="'+c[0]+'" aria-selected="'+(UI.plan===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>';
+  if(UI.plan==='habits')h+=planHabits();
+  else if(UI.plan==='tasks')h+=planTasks();
+  else h+=planGoals();
+  return h;
+}
+function planHabits(){
+  var mon=addDays(getMonday(new Date()),UI.wk*7),wk=ymd(mon),today=todayKey(),pct=weekPctFor(mon);
+  var h='<div class="weeknav"><button class="iconbtn" data-act="wk" data-v="-1" aria-label="Previous week">'+ic('chevron_left','s20')+'</button><div style="text-align:center"><div class="eyebrow">'+(UI.wk===0?'This week':'Week of')+'</div><h2 class="h-sm">'+mon.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' – '+addDays(mon,6).toLocaleDateString(undefined,{month:'short',day:'numeric'})+'</h2></div><button class="iconbtn" data-act="wk" data-v="1" aria-label="Next week">'+ic('chevron_right','s20')+'</button></div>';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="muted">'+D.weeklyTasks.length+' habit'+(D.weeklyTasks.length===1?'':'s')+' · '+overallStreak()+' day streak</span><span class="pill sage num">'+pct+'% this week</span></div>';
+  if(!D.weeklyTasks.length)h+='<div class="empty">No habits yet. Add one, name it and pick the days you want to do it.</div>';
+  D.weeklyTasks.forEach(function(t){
+    var score=weekScore(t,mon),goal=habitGoal(t),s=habitStreak(t);
+    h+='<div class="card sm hab"><div class="hab-h"><button class="hab-name" data-act="open-habit" data-id="'+t.id+'" aria-label="Edit '+esc(t.text)+'"><b>'+esc(t.text)+'</b><span>'+esc(t.days?daysLabel(t):goal+' days a week')+(s>1?' · <span class="fire">'+ic('local_fire_department','s14 f')+s+'</span>':'')+'</span></button><span class="pill '+(score>=goal?'sage':'wash')+' num">'+score+'/'+goal+'</span></div><div class="wdays">';
+    for(var j=0;j<7;j++){var k=ymd(addDays(mon,j)),on=checked(t,k),sc=!t.days||t.days.indexOf(j)>-1;
+      h+='<button class="wd'+(k===today?' today':'')+(sc?' sch':' off')+'" data-act="hab" data-id="'+t.id+'" data-date="'+k+'" aria-pressed="'+on+'" aria-label="'+DAYN[j]+(on?' done':sc?'':' not scheduled')+'"><i class="'+(on?'on':'')+'">'+ic('check','s16')+'</i>'+DAYS[j]+'</button>'}
+    h+='</div></div>';
+  });
+  h+='<button class="btn ghost" data-act="open-habit">'+ic('add','s20')+'Add a habit</button>';
   var cur=getMonday(new Date()),hist='';
   for(var i=-5;i<=0;i++){var m=addDays(cur,i*7),pp=weekPctFor(m);hist+='<div class="'+(i===0?'cur':'')+'"><b class="num">'+(D.weeklyTasks.length?pp+'%':'')+'</b><i style="height:'+Math.max(6,pp*0.7)+'px"></i><small>'+fmtShort(ymd(m))+'</small></div>'}
-  h+='<div class="sec"><div class="sec-h"><h2 class="h-md">Last 6 weeks</h2><span class="faint" style="font-size:13px">Weekly habits</span></div><div class="card sm"><div class="weeks">'+hist+'</div></div></div>';
-  h+='<div class="card sec" style="gap:14px"><div><h2 class="h-md">Weekly Review</h2><p class="muted">What went well? What will you fix? ('+mon.toLocaleDateString(undefined,{month:'short',day:'numeric'})+')</p></div><label class="l" for="wkNote" style="margin:0;position:absolute;left:-9999px">Weekly review</label><textarea id="wkNote" data-wk="'+wk+'" placeholder="Wins, small or large, and one thing to change next week">'+esc(D.weeklyNotes[wk]||'')+'</textarea></div>';
+  h+='<div class="card sec" style="gap:14px"><div class="sec-h"><h2 class="h-md">Weekly review</h2><span class="faint" style="font-size:13px">Last 6 weeks</span></div><div class="weeks">'+hist+'</div><label for="wkNote" style="position:absolute;left:-9999px">Weekly review</label><textarea id="wkNote" data-wk="'+wk+'" placeholder="What went well? What will you fix?">'+esc(D.weeklyNotes[wk]||'')+'</textarea></div>';
+  return h;
+}
+function planTasks(){
+  var open=openTodos(),done=D.todoItems.filter(function(t){return t.done});
+  var h='<form class="addbar" id="quickAdd">'+ic('add_task','s24')+'<input id="qaText" placeholder="Add a task…" aria-label="New task" autocomplete="off"><button class="btn sm" type="submit">Add '+ic('arrow_upward','s18')+'</button></form>';
+  h+='<div class="sec"><div class="group-h"><div class="l">'+ic('psychology','s20')+'Open tasks</div><span class="pill terra num">'+open.length+' open</span></div><div class="list">';
+  h+=open.length?open.map(function(t){return taskRow(t,true)}).join(''):'<div class="empty">Nothing open. Add a task above.</div>';
+  if(done.length){
+    h+='<button class="tgl" data-act="toggle-done">'+ic(UI.showDone?'expand_less':'expand_more','s18')+(UI.showDone?'Hide':'Show')+' completed ('+done.length+')</button>';
+    if(UI.showDone){h+=done.map(function(t){return taskRow(t,true)}).join('');h+='<button class="link more" data-act="clear-done">Clear completed</button>'}
+  }
+  h+='</div></div><button class="btn ghost" data-act="open-task">'+ic('event','s20')+'Add with a date or priority</button>';
+  return h;
+}
+function planGoals(){
+  var today=todayKey(),h='';
+  var sorted=D.goalItems.slice().sort(function(a,b){return ((a.progress||0)>=100?1:0)-((b.progress||0)>=100?1:0)||(b.pinned?1:0)-(a.pinned?1:0)});
+  if(!sorted.length)h+='<div class="empty">No goals yet. Add one and move the slider as you make progress.</div>';
+  sorted.forEach(function(g){
+    var p=g.progress||0,due='';
+    if(g.due){var d=daysBetween(today,g.due);due=p>=100?'<span class="pill sage">Done</span>':d<0?'<span class="pill over">'+(-d)+' day'+(d===-1?'':'s')+' overdue</span>':'<span class="pill '+(d<=14?'olive':'wash')+'">'+(d===0?'Due today':d+' day'+(d===1?'':'s')+' left')+' · '+fmtShort(g.due)+'</span>'}
+    h+='<div class="card goal'+(p>=100?' done':'')+'"><div class="goal-top"><div class="tx">'+(due?'<div class="tags">'+due+'</div>':'')+'<h3>'+esc(g.text)+'</h3></div><button class="pin'+(g.pinned?' on':'')+'" data-act="gpin" data-id="'+g.id+'" aria-label="'+(g.pinned?'Unpin':'Pin')+'" aria-pressed="'+!!g.pinned+'">'+ic('push_pin','s20'+(g.pinned?' f':''))+'</button><button class="pin" data-act="del" data-kind="goal" data-id="'+g.id+'" aria-label="Delete '+esc(g.text)+'">'+ic('delete','s20')+'</button></div>';
+    h+=bar(p,'sage')+'<div style="display:flex;align-items:center;gap:12px"><input class="range" type="range" min="0" max="100" step="5" value="'+p+'" data-prog="'+g.id+'" aria-label="Progress for '+esc(g.text)+'"><b class="num" id="gp-'+g.id+'" style="min-width:42px;text-align:right">'+p+'%</b></div></div>';
+  });
+  h+='<button class="btn ghost" data-act="open-goal">'+ic('add','s20')+'Add a goal</button>';
   return h;
 }
 
@@ -638,8 +660,7 @@ function render(){
   var a=document.activeElement,keep=null;
   if(a&&a.id&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.closest('main')){keep={id:a.id,v:a.value,s:a.selectionStart,e:a.selectionEnd}}
   $('#v-today').innerHTML=vToday();
-  $('#v-tasks').innerHTML=vTasks();
-  $('#v-goals').innerHTML=vGoals();
+  $('#v-plan').innerHTML=vPlan();
   $('#v-health').innerHTML=vHealth();
   if(keep){var el=document.getElementById(keep.id);if(el){el.value=keep.v;try{el.focus();el.setSelectionRange(keep.s,keep.e)}catch(e){}}}
   var n=UI.userName||'';$('#avatarBtn').textContent=(n||(UI.sync.email||'A')).charAt(0).toUpperCase();
@@ -649,7 +670,7 @@ function show(tab){
   UI.tab=tab;
   $$('.view').forEach(function(v){v.classList.toggle('on',v.id==='v-'+tab)});
   $$('.tab').forEach(function(t){t.setAttribute('aria-selected',t.dataset.tab===tab)});
-  $('#fabQuick').hidden=(tab==='tasks');
+  $('#fabQuick').hidden=false;
   window.scrollTo(0,0);
 }
 var toastT;
@@ -661,59 +682,49 @@ function openSheet(id){$('#scrim').classList.add('on');$(id).classList.add('on')
 function closeSheets(){$('#scrim').classList.remove('on');$$('.sheet').forEach(function(s){s.classList.remove('on')});stopScan()}
 
 /* ---------- actions ---------- */
-function toggle(kind,id,date){
-  if(kind==='focus'){var it=(D.focusByDate[date]||[]).filter(function(x){return x.id===id})[0];if(it){it.done=!it.done;save('focusByDate')}}
-  else if(kind==='routine'){D.routineChecks[date]=D.routineChecks[date]||{};D.routineChecks[date][id]=!D.routineChecks[date][id];save('routineChecks')}
-  else if(kind==='todo'){var t=D.todoItems.filter(function(x){return x.id===id})[0];if(t){t.done=!t.done;save('todoItems')}}
-}
-function remove(kind,id,date){
+function removeItem(kind,id,date){
   var key,snap;
-  if(kind==='focus'){key='focusByDate';snap=JSON.stringify(D.focusByDate);D.focusByDate[date]=(D.focusByDate[date]||[]).filter(function(x){return x.id!==id})}
-  else if(kind==='routine'){key='routineItems';snap=JSON.stringify(D.routineItems);D.routineItems=D.routineItems.filter(function(x){return x.id!==id})}
-  else if(kind==='todo'){key='todoItems';snap=JSON.stringify(D.todoItems);D.todoItems=D.todoItems.filter(function(x){return x.id!==id})}
+  if(kind==='task'){key='todoItems';snap=JSON.stringify(D.todoItems);D.todoItems=D.todoItems.filter(function(x){return x.id!==id})}
   else if(kind==='goal'){key='goalItems';snap=JSON.stringify(D.goalItems);D.goalItems=D.goalItems.filter(function(x){return x.id!==id})}
-  else if(kind==='weekly'){key='weeklyTasks';snap=JSON.stringify(D.weeklyTasks);D.weeklyTasks=D.weeklyTasks.filter(function(x){return x.id!==id})}
+  else if(kind==='habit'){key='weeklyTasks';snap=JSON.stringify(D.weeklyTasks);D.weeklyTasks=D.weeklyTasks.filter(function(x){return x.id!==id})}
   else if(kind==='food'){key='foodLog';snap=JSON.stringify(D.foodLog);D.foodLog[date]=(D.foodLog[date]||[]).filter(function(x){return x.id!==id});if(!D.foodLog[date].length)delete D.foodLog[date]}
   save(key);render();
   toast('Deleted',function(){D[key]=JSON.parse(snap);save(key);render()});
 }
-function addTask(){
-  var title=$('#ntTitle').value.trim(),sec=$('#ntSec').value;
-  if(!title){toast('Give it a name first');return false}
-  if(sec==='focus'){
-    var ds=UI.tab==='tasks'?UI.selDate:todayKey(),l=D.focusByDate[ds]||[];
-    if(l.length>=3){toast('Three priorities is the limit for a day');return false}
-    l.push({id:uid(),text:title,done:false});D.focusByDate[ds]=l;save('focusByDate');
-  } else if(sec==='morning'||sec==='evening'){
-    D.routineItems.push({id:uid(),text:title,when:sec});save('routineItems');
-  } else {
-    D.todoItems.push({id:uid(),text:title,done:false,due:$('#ntDue').value||'',priority:$('#ntPri').checked});save('todoItems');
-  }
-  render();toast('Added');return true;
+function addTask(title,due,pri){
+  title=(title||'').trim();if(!title){toast('Give it a name first');return false}
+  D.todoItems.push({id:uid(),text:title,done:false,due:due||'',priority:!!pri});save('todoItems');render();toast('Task added');return true;
 }
 function addGoal(){
-  var title=$('#ngTitle').value.trim();
-  if(!title){toast('Give the goal a name first');return false}
-  if(UI.ngType==='long'){D.goalItems.push({id:uid(),text:title,pinned:false,progress:0,due:$('#ngDue').value||''});save('goalItems')}
-  else{D.weeklyTasks.push({id:uid(),text:title,goal:parseInt($('#ngDays').value,10)||3});save('weeklyTasks')}
-  UI.gfilter='all';render();toast('Goal added');return true;
+  var title=$('#ngTitle').value.trim();if(!title){toast('Give the goal a name first');return false}
+  D.goalItems.push({id:uid(),text:title,pinned:false,progress:0,due:$('#ngDue').value||''});save('goalItems');UI.plan='goals';render();toast('Goal added');return true;
 }
 function setWater(delta){
   var k=todayKey(),v=Math.max(0,Math.min(30,waterToday()+delta));D.waterByDate[k]=v;
-  // keep only the last 120 days
   var cutoff=ymd(addDays(new Date(),-120));Object.keys(D.waterByDate).forEach(function(x){if(x<cutoff)delete D.waterByDate[x]});
   save('waterByDate');render();
   if(delta>0)toast('Glass logged · '+v+' of '+waterGoal());
 }
-function openAddSheet(sec){
-  $('#ntTitle').value='';$('#ntDue').value='';$('#ntPri').checked=false;$('#ntSec').value=sec||'todo';
-  $('#ntTodoOpts').hidden=($('#ntSec').value!=='todo');
-  closeSheets();openSheet('#shTask');setTimeout(function(){$('#ntTitle').focus()},300);
+function openTaskSheet(){$('#ntTitle').value='';$('#ntDue').value='';$('#ntPri').checked=false;closeSheets();openSheet('#shTask');setTimeout(function(){$('#ntTitle').focus()},300)}
+function openGoalSheet(){$('#ngTitle').value='';$('#ngDue').value='';closeSheets();openSheet('#shGoal');setTimeout(function(){$('#ngTitle').focus()},300)}
+function rHdays(){
+  $('#hbDays').innerHTML=DAYN.map(function(n,i){return '<button type="button" class="dchip" data-act="hday" data-i="'+i+'" aria-pressed="'+(UI.hdays.indexOf(i)>-1)+'">'+n+'</button>'}).join('');
 }
-function openGoalSheet(){UI.ngType='weekly';setNgType();$('#ngTitle').value='';$('#ngDue').value='';closeSheets();openSheet('#shGoal');setTimeout(function(){$('#ngTitle').focus()},300)}
-function setNgType(){
-  $$('#ngType button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.v===UI.ngType)});
-  $('#ngWeeklyOpts').hidden=UI.ngType!=='weekly';$('#ngLongOpts').hidden=UI.ngType!=='long';
+function openHabitSheet(id){
+  var h=id?D.weeklyTasks.filter(function(x){return x.id===id})[0]:null;
+  UI.editHabit=h?h.id:null;
+  UI.hdays=h?(h.days?h.days.slice():[0,1,2,3,4,5,6]):[0,1,2,3,4,5,6];
+  $('#hbTitle').value=h?h.text:'';$('#hbHead').textContent=h?'Edit habit':'Add a habit';$('#hbSave').textContent=h?'Save changes':'Add habit';$('#hbDel').hidden=!h;
+  rHdays();closeSheets();openSheet('#shHabit');if(!h)setTimeout(function(){$('#hbTitle').focus()},300);
+}
+function saveHabit(){
+  var title=$('#hbTitle').value.trim();
+  if(!title){toast('Give the habit a name first');return false}
+  if(!UI.hdays.length){toast('Pick at least one day');return false}
+  var days=UI.hdays.slice().sort(function(a,b){return a-b});
+  if(UI.editHabit){var h=D.weeklyTasks.filter(function(x){return x.id===UI.editHabit})[0];if(h){h.text=title;h.days=days;h.goal=days.length}}
+  else D.weeklyTasks.push({id:uid(),text:title,goal:days.length,days:days});
+  save('weeklyTasks');UI.plan='habits';render();toast(UI.editHabit?'Habit updated':'Habit added');return true;
 }
 
 /* ---------- food sheet ---------- */
@@ -872,7 +883,7 @@ function applyState(s){
     D[k]=ARRAYS.indexOf(k)>-1?arr(s[k]):obj(s[k]);
   });
   KEYS.forEach(function(k){try{localStorage.setItem(k,JSON.stringify(D[k]))}catch(e){}});
-  applyingRemote=false;render();
+  applyingRemote=false;migrate();render();
 }
 function deepOr(a,b){
   if(a&&b&&typeof a==='object'&&typeof b==='object'){var o={};new Set(Object.keys(a).concat(Object.keys(b))).forEach(function(k){o[k]=deepOr(a[k],b[k])});return o}
@@ -903,7 +914,7 @@ window.Antly={getState:getState,applyState:applyState,mergeState:mergeState,
 
 /* ---------- events ---------- */
 document.addEventListener('click',function(e){
-  var t=e.target.closest('[data-act]'),id=e.target.id;
+  var t=e.target.closest('[data-act]');
   if(!t){
     if(e.target.closest('#syncBtn')||e.target.closest('#avatarBtn')){closeSheets();rSync();openSheet('#shSync');return}
     if(e.target.closest('#fabQuick')){openSheet('#shQuick');return}
@@ -913,28 +924,30 @@ document.addEventListener('click',function(e){
   var a=t.dataset.act,v=t.dataset.v,ds=t.dataset;
   switch(a){
     case 'tab':case 'go':show(ds.tab);break;
+    case 'plan':UI.plan=v;show('plan');render();break;
     case 'close':closeSheets();break;
-    case 'tog':toggle(ds.kind,ds.id,ds.date);render();break;
-    case 'del':remove(ds.kind,ds.id,ds.date);break;
+    case 'hab':var hh=D.weeklyTasks.filter(function(x){return x.id===ds.id})[0];if(hh){setChecked(hh,ds.date,!checked(hh,ds.date));render()}break;
+    case 'tog':var tk=D.todoItems.filter(function(x){return x.id===ds.id})[0];if(tk){tk.done=!tk.done;save('todoItems');render()}break;
+    case 'del':removeItem(ds.kind,ds.id,ds.date);break;
     case 'mood':D.moodByDate[todayKey()]=+v;save('moodByDate');render();toast('Mood logged');break;
     case 'water':setWater(+v);break;
-    case 'selday':UI.selDate=ds.date;render();break;
-    case 'twk':UI.tasksWk+=+v;UI.selDate=UI.tasksWk===0?todayKey():ymd(addDays(getMonday(new Date()),UI.tasksWk*7));render();break;
-    case 'gwk':UI.goalsWk+=+v;render();break;
+    case 'wk':UI.wk+=+v;render();break;
     case 'toggle-done':UI.showDone=!UI.showDone;render();break;
     case 'clear-done':var sn=JSON.stringify(D.todoItems);D.todoItems=D.todoItems.filter(function(x){return !x.done});save('todoItems');render();toast('Cleared completed',function(){D.todoItems=JSON.parse(sn);save('todoItems');render()});break;
-    case 'gf':UI.gfilter=v;render();break;
-    case 'wkday':var wk=ds.wk;D.weeklyChecks[wk]=D.weeklyChecks[wk]||{};D.weeklyChecks[wk][ds.id]=D.weeklyChecks[wk][ds.id]||{};D.weeklyChecks[wk][ds.id][ds.date]=!D.weeklyChecks[wk][ds.id][ds.date];save('weeklyChecks');render();break;
-    case 'wkgoal':var wt=D.weeklyTasks.filter(function(x){return x.id===ds.id})[0];if(wt){wt.goal=Math.max(1,Math.min(7,(wt.goal||1)+ +v));save('weeklyTasks');render()}break;
     case 'gpin':var g=D.goalItems.filter(function(x){return x.id===ds.id})[0];if(g){g.pinned=!g.pinned;save('goalItems');render()}break;
-    case 'open-add':openAddSheet(ds.sec);break;
+    case 'open-habit':openHabitSheet(ds.id||null);break;
+    case 'open-task':openTaskSheet();break;
     case 'open-goal':openGoalSheet();break;
-    case 'save-task':if(addTask())closeSheets();break;
-    case 'save-goal':if(addGoal()){closeSheets();show('goals')}break;
-    case 'ngtype':UI.ngType=v;setNgType();break;
-    case 'qa-water':closeSheets();setWater(1);break;
-    case 'qa-task':openAddSheet('todo');break;
+    case 'hday':var di=+ds.i,ix=UI.hdays.indexOf(di);if(ix>-1)UI.hdays.splice(ix,1);else UI.hdays.push(di);rHdays();break;
+    case 'hpreset':UI.hdays=v==='all'?[0,1,2,3,4,5,6]:v==='weekdays'?[0,1,2,3,4]:[5,6];rHdays();break;
+    case 'save-habit':if(saveHabit())closeSheets();break;
+    case 'del-habit':var hid=UI.editHabit;closeSheets();if(hid)removeItem('habit',hid);break;
+    case 'save-task':if(addTask($('#ntTitle').value,$('#ntDue').value,$('#ntPri').checked)){closeSheets();show('plan');UI.plan='tasks';render()}break;
+    case 'save-goal':if(addGoal()){closeSheets();show('plan')}break;
+    case 'qa-habit':openHabitSheet(null);break;
+    case 'qa-task':openTaskSheet();break;
     case 'qa-goal':openGoalSheet();break;
+    case 'qa-water':closeSheets();setWater(1);break;
     case 'qa-mood':closeSheets();show('today');setTimeout(function(){var m=$('.mood');if(m)m.scrollIntoView({behavior:'smooth',block:'center'})},60);break;
     case 'qa-food':case 'open-food':openFood();break;
     case 'foodtog':UI.foodOpen=!UI.foodOpen;render();break;
@@ -976,13 +989,12 @@ $('#scrim').addEventListener('click',closeSheets);
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheets()});
 document.addEventListener('change',function(e){
   var t=e.target;
-  if(t.id==='ntSec'){$('#ntTodoOpts').hidden=(t.value!=='todo')}
   if(t.dataset&&t.dataset.prog){var g=D.goalItems.filter(function(x){return x.id===t.dataset.prog})[0];if(g){g.progress=parseInt(t.value,10);save('goalItems');render()}}
   if(t.id==='importFile'){
     var f=t.files[0];if(!f)return;var r=new FileReader();
     r.onload=function(){
       try{var data=JSON.parse(r.result);if(!data||typeof data!=='object')throw new Error('bad');
-        applyState(mergeState(getState(),data));KEYS.forEach(save);toast('Imported');
+        applyState(mergeState(getState(),data));KEYS.forEach(function(k){save(k)});toast('Imported');
       }catch(err){toast('That file is not a valid Antly or Daily Tracker export')}
       t.value='';
     };r.readAsText(f);
@@ -1001,13 +1013,14 @@ document.addEventListener('input',function(e){
 });
 document.addEventListener('submit',function(e){
   var f=e.target;e.preventDefault();
-  if(f.id==='quickAdd'){var i=$('#qaText'),v=i.value.trim();if(!v)return;D.todoItems.push({id:uid(),text:v,done:false,due:'',priority:false});save('todoItems');i.value='';render();toast('Task added');setTimeout(function(){var q=$('#qaText');if(q)q.focus()},0)}
+  if(f.id==='quickAdd'){var i=$('#qaText');if(addTask(i.value,'',false)){setTimeout(function(){var q=$('#qaText');if(q){q.value='';q.focus()}},0)}}
   if(f.id==='fdSearchForm')foodSearch();
   if(f.id==='fdCodeForm')lookupBarcode($('#fdCode').value);
 });
-document.addEventListener('visibilitychange',function(){if(!document.hidden){if(UI.selDate<ymd(getMonday(new Date()))&&UI.tasksWk===0)UI.selDate=todayKey();render()}});
+document.addEventListener('visibilitychange',function(){if(!document.hidden)render()});
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){render()});
 
+migrate();
 render();show('today');
 })();
 </script>
